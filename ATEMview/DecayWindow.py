@@ -50,8 +50,8 @@ class DecayWidget(QWidget):
         t = sounding.t.values
         obs = sounding.dBdt_Z.values
         pred = sounding.dBdt_Z_pred.values
-        lower = obs - sounding.dBdt_Z_UN.values
-        upper = obs + sounding.dBdt_Z_UN.values
+        lower = obs - sounding.dBdt_Z_uncert.values
+        upper = obs + sounding.dBdt_Z_uncert.values
 
         self.lc.obsPlot.set_data(t, obs)
         self.lc.predPlot.set_data(t, pred)
@@ -72,13 +72,14 @@ class DecayWidget(QWidget):
 
 if __name__ == '__main__':
 
-    import sys
     from PyQt5.QtWidgets import QApplication
-    from data import readObsPred
     from ATEMview import ATEMviewer
+    from InvTools.ATEM import ATEMdata
 
-    dat = readObsPred('/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170503/Inv9_Aspect/obs.txt',
-                      '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170503/Inv9_Aspect/dpred.txt')
+    obsFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170425/Inv1_HMprelim/obs.txt'
+    predFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170425/Inv1_HMprelim/dpred.txt'
+
+    dat = ATEMdata(obsFile, predFile)
 
     app = QApplication([])
     ATEM = ATEMviewer(dat)

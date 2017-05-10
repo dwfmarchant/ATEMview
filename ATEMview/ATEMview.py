@@ -16,7 +16,7 @@ class ATEMviewer(object):
 
         # Store data
         self.data = data
-        self.locs = self.data[['locInd', 'x', 'y']].drop_duplicates()
+        self.locs = data.locs.copy()
 
         # Initial the Gui
         self.LocWindow = LocWidget(self)
@@ -25,14 +25,14 @@ class ATEMviewer(object):
         self.DecayWindow = DecayWidget(self)
 
         # Initialize the selection
-        self.setSelectedLocInd(self.locs.iloc[0].locInd)
+        self.setSelectedLocInd(self.locs.iloc[0].name)
         
     def setSelectedLocInd(self, locInd):
         """ docstring """
-        if (locInd == self.locs.locInd).any():
+        if (locInd == self.locs.index).any():
             self.selectedLocInd = locInd
-            selectedLocation = self.locs[self.locs.locInd == locInd]
-            selectedDecay = self.data[self.data.locInd == locInd]
+            selectedLocation = self.locs.loc[locInd]
+            selectedDecay = self.data.getLoc(locInd)
 
             self.LocWindow.setSel(selectedLocation.x, selectedLocation.y)
             self.DecayWindow.setDecay(selectedDecay)
@@ -54,7 +54,7 @@ class ATEMviewer(object):
         dx = self.locs.x - x
         dy = self.locs.y - y
         r = np.sqrt(dx**2 + dy**2)
-        closestInd = self.locs.loc[r.argmin(), 'locInd']
+        closestInd = r.argmin()
         return closestInd
 
 
@@ -85,10 +85,12 @@ class ATEMviewer(object):
 
 if __name__ == '__main__':
 
-    from data import readObsPred
+    from InvTools.ATEM import ATEMdata
 
-    dat = readObsPred('/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170503/Inv9_Aspect/obs.txt',
-                      '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170503/Inv9_Aspect/dpred.txt')
+    obsFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170425/Inv1_HMprelim/obs.txt'
+    predFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170425/Inv1_HMprelim/dpred.txt'
+
+    dat = ATEMdata(obsFile, predFile)
 
     app = QApplication(sys.argv)
     ATEM = ATEMviewer(dat)

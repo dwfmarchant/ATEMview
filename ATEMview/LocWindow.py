@@ -78,14 +78,16 @@ class LocWidget(QWidget):
 
 if __name__ == '__main__':
 
-    import sys
+
     from PyQt5.QtWidgets import QApplication
-    from data import readObsPred
     from ATEMview import ATEMviewer
+    from InvTools.ATEM import ATEMdata
 
-    dat = readObsPred('/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170503/Inv9_Aspect/obs.txt',
-                      '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170503/Inv9_Aspect/dpred.txt')
+    obsFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170425/Inv1_HMprelim/obs.txt'
+    predFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170425/Inv1_HMprelim/dpred.txt'
 
-    app = QApplication(sys.argv)
+    dat = ATEMdata(obsFile, predFile)
+
+    app = QApplication([])
     ATEM = ATEMviewer(dat)
     app.exec_()
