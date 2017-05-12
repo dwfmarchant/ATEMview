@@ -22,10 +22,11 @@ class LocsCanvas(Canvas):
     def onClick(self, event):
         """ Docstring """
 
-        signal = {'name':'locClicked',
-                  'xdata':event.xdata,
-                  'ydata':event.ydata}
-        self.locClicked.emit(signal)
+        if event.inaxes is not None:
+            signal = {'name':'locClicked',
+                      'xdata':event.xdata,
+                      'ydata':event.ydata}
+            self.locClicked.emit(signal)
 
 class LocWidget(QWidget):
     """docstring for LocWidget"""
