@@ -21,6 +21,7 @@ class DecayCanvas(Canvas):
         self.obsPlot, = self.axes.plot([], [], '-o', c='k', ms=2., label="Obs")
         self.predPlot, = self.axes.plot([], [], '-o', c='r', ms=2., label="Pred")
         self.uncertBounds = self.axes.fill_between([], [], alpha=0.3, color='k')
+        self.timePlot, = self.axes.plot([], [], '-', color='green', zorder = -1)
         self.axes.legend()
 
 class DecayWidget(QWidget):
@@ -65,10 +66,10 @@ class DecayWidget(QWidget):
         self.lc.axes.set_title(sounding.locInd.iloc[0])
         self.lc.draw()
 
-    # def setSel(self, x, y):
-        # """ Docstring """
-        # self.lc.selPlot.set_data(x, y)
-        # self.lc.draw()
+    def setTime(self, time):
+        """ docstring """
+        self.lc.timePlot.set_data([time, time], [1e-20, 10])
+        self.lc.draw()
 
 if __name__ == '__main__':
 
@@ -76,8 +77,8 @@ if __name__ == '__main__':
     from ATEMview import ATEMviewer
     from InvTools.ATEM import ATEMdata
 
-    obsFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170425/Inv1_HMprelim/obs.txt'
-    predFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170425/Inv1_HMprelim/dpred.txt'
+    obsFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170508/Inv11_NWtrial/obs.txt'
+    predFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170508/Inv11_NWtrial/dpred.txt'
 
     dat = ATEMdata(obsFile, predFile)
 
