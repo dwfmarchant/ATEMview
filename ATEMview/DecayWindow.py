@@ -44,6 +44,12 @@ class DecayWidget(QWidget):
 
         self.move(700., 100.)
 
+    def toggleVisible(self):
+        """ docstring """
+        if self.isVisible():
+            self.hide()
+        else:
+            self.show()
 
     def setDecay(self, sounding):
         """ Docstring """

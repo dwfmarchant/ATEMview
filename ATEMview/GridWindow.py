@@ -31,7 +31,7 @@ class GridCanvas(FigureCanvas):
 
         self.draw()
 
-        
+
     def showGrid(self, xv, yv, GrdObs, GrdPred):
         """Docstring"""
         self.obs_axes.cla()
@@ -63,10 +63,10 @@ class GridWidget(QWidget):
         self.nextLocInd.connect(parent.get_event)
         self.prevLocInd.connect(parent.get_event)
         self.show()
-        
+
     def init_ui(self):
         """ Docstring """
-        self.gc = GridCanvas(parent=self, width=10, height=4, dpi=100)        
+        self.gc = GridCanvas(parent=self, width=10, height=4, dpi=100)
         toolbar = NavigationToolbar(self.gc, self, coordinates=False)
         l = QVBoxLayout(self)
         l.addWidget(self.gc)
@@ -74,6 +74,13 @@ class GridWidget(QWidget):
 
         self.move(50, 3000)
         # self.move(-1500, 200)
+
+    def toggleVisible(self):
+        """ docstring """
+        if self.isVisible():
+            self.hide()
+        else:
+            self.show()
 
     def setGrid(self, xv, yv, GrdObs, GrdPred):
         self.gc.showGrid(xv, yv, GrdObs, GrdPred)
@@ -97,7 +104,7 @@ class GridWidget(QWidget):
             self.prevLocInd.emit(signal)
         elif key == Qt.Key_Down:
             signal = {'name':'prevTimeInd'}
-            self.prevLocInd.emit(signal)    
+            self.prevLocInd.emit(signal)
 
 
 if __name__ == '__main__':

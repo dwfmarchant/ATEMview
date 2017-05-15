@@ -53,6 +53,13 @@ class LocWidget(QWidget):
 
         self.move(50, 100)
 
+    def toggleVisible(self):
+        """ docstring """
+        if self.isVisible():
+            self.hide()
+        else:
+            self.show()
+
     def setAll(self, x, y):
         """ Docstring """
         self.lc.allPlot.set_data(x, y)
