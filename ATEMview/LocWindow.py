@@ -51,7 +51,8 @@ class LocWidget(QWidget):
         l.addWidget(self.lc)
         l.addWidget(toolbar)
 
-        self.move(50, 100)
+        # self.move(10, 5)
+        self.move(-2000, -400)
 
     def toggleVisible(self):
         """ docstring """

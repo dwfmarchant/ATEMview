@@ -15,7 +15,7 @@ class DecayCanvas(Canvas):
         super().__init__(parent, width, height, dpi)
         self.axes.set_yscale('log')
         self.axes.set_xscale('log')
-        
+
     def initPlot(self):
         """Docstring"""
         self.obsPlot, = self.axes.plot([], [], '-o', c='k', ms=2., label="Obs")
@@ -32,17 +32,18 @@ class DecayWidget(QWidget):
         self.init_ui()
         self.lc.locClicked.connect(parent.get_event)
         self.show()
-        
+
     def init_ui(self):
         """ Docstring """
         self.lc = DecayCanvas(parent=self, width=5, height=4, dpi=100)
         toolbar = NavigationToolbar(self.lc, self, coordinates=False)
-        
+
         l = QVBoxLayout(self)
         l.addWidget(self.lc)
         l.addWidget(toolbar)
 
-        self.move(700., 100.)
+        # self.move(600., 5.)
+        self.move(-1000, -400)
 
     def toggleVisible(self):
         """ docstring """
@@ -53,7 +54,7 @@ class DecayWidget(QWidget):
 
     def setDecay(self, sounding):
         """ Docstring """
-        
+
         t = sounding.t.values
         obs = sounding.dBdt_Z.values
         pred = sounding.dBdt_Z_pred.values

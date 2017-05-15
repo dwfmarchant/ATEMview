@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
 import numpy as np
 from InvTools.Utils import makeGrid, maskGrid
 
+from MainWindow import MainWindow
 from LocWindow import LocWidget
 from DecayWindow import DecayWidget
 from GridWindow import GridWidget
@@ -26,18 +27,40 @@ class ATEMviewer(object):
         self.data = data
 
         # Initial the Gui
-        self.LocWindow = LocWidget(self)
-        self.LocWindow.setAll(self.data.locs.x.values, 
-                              self.data.locs.y.values)
-
-        self.DecayWindow = DecayWidget(self)
-
-        self.GridWindow = GridWidget(self)
-        self.grids = {}
+        self.MainWindow = MainWindow(self)
 
         # Initialize the selection
         self.setSelectedLocInd(self.data.locs.iloc[0].name)
         self.setSelectedTimeInd(self.data.times.iloc[0].name)
+
+    def openLocWindow(self):
+        """ docstring """
+        if self.LocWindow is None:
+            self.LocWindow = LocWidget(self)
+            self.LocWindow.setAll(self.data.locs.x.values,
+                                  self.data.locs.y.values)
+            self.setSelectedLocInd(self.selectedLocInd)
+            self.setSelectedTimeInd(self.selectedTimeInd)
+        else:
+            self.LocWindow.toggleVisible()
+
+    def openDecayWindow(self):
+        """ docstring """
+        if self.DecayWindow is None:
+            self.DecayWindow = DecayWidget(self)
+            self.setSelectedLocInd(self.selectedLocInd)
+            self.setSelectedTimeInd(self.selectedTimeInd)
+        else:
+            self.DecayWindow.toggleVisible()
+
+    def openGridWindow(self):
+        """ docstring """
+        if self.GridWindow is None:
+            self.GridWindow = GridWidget(self)
+            self.setSelectedLocInd(self.selectedLocInd)
+            self.setSelectedTimeInd(self.selectedTimeInd)
+        else:
+            self.GridWindow.toggleVisible()
 
     def setSelectedLocInd(self, locInd):
         """ docstring """
@@ -46,22 +69,24 @@ class ATEMviewer(object):
             selectedLocation = self.data.locs.loc[locInd]
             selectedDecay = self.data.getLoc(locInd)
 
-            self.LocWindow.setSel(selectedLocation.x, selectedLocation.y)
-            self.DecayWindow.setDecay(selectedDecay)
+            if self.LocWindow is not None:
+                self.LocWindow.setSel(selectedLocation.x, selectedLocation.y)
+            if self.DecayWindow is not None:
+                self.DecayWindow.setDecay(selectedDecay)
 
     def setSelectedTimeInd(self, timeInd):
         """ docstring """
 
-        if self.GridWindow is not None:
-            if timeInd in self.data.times.index:
-                self.selectedTimeInd = timeInd
+        if timeInd in self.data.times.index:
+            self.selectedTimeInd = timeInd
+            if self.GridWindow is not None:
                 if timeInd not in self.grids:
                     dt = self.data.getTime(timeInd)
                     xv, yv, GrdObs = makeGrid(dt.x, dt.y, dt.dBdt_Z, method="cubic")
                     _, _, GrdPred = makeGrid(dt.x, dt.y, dt.dBdt_Z_pred, method="cubic")
                     mask = ~maskGrid(dt.x.values, dt.y.values, xv, yv, 100.)
                     GrdObs[mask] = np.nan
-                    GrdPred[mask] = np.nan    
+                    GrdPred[mask] = np.nan
                     self.grids[timeInd] = [xv, yv, GrdObs, GrdPred]
 
                 self.GridWindow.setGrid(*self.grids[timeInd])
@@ -105,6 +130,7 @@ if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     ATEM = ATEMviewer(dat)
+    ATEM.openGridWindow()
 
     # aw = ApplicationWindow(dat)
     # aw.setWindowTitle("PyQt5 Matplot Example")

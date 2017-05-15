@@ -72,8 +72,8 @@ class GridWidget(QWidget):
         l.addWidget(self.gc)
         l.addWidget(toolbar)
 
-        self.move(50, 3000)
-        # self.move(-1500, 200)
+        # self.move(50, 3000)
+        self.move(-1500, 200)
 
     def toggleVisible(self):
         """ docstring """
