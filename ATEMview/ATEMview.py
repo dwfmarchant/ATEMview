@@ -96,6 +96,14 @@ class ATEMviewer(object):
                     self.grids[timeInd] = [xv, yv, GrdObs, GrdPred]
                 self.GridWindow.setGrid(*self.grids[timeInd])
 
+    def closeAll(self):
+        """ Close all open windows """
+        for window in [self.LocWindow, self.DecayWindow, self.GridWindow]:
+            if window is not None:
+                window.deleteLater()
+                window = None
+        self.MainWindow.close()
+
     @QtCore.pyqtSlot(dict)
     def get_event(self, event):
         """ docstring """

@@ -51,6 +51,9 @@ class MainWindow(QMainWindow):
         elif sender.text() == "Grid":
             self.parent.openGridWindow()
 
+    def closeEvent(self, event):
+        self.parent.closeAll()
+        event.accept()
 
 if __name__ == '__main__':
 
