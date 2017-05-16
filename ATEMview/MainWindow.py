@@ -4,12 +4,28 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import (QApplication, QMainWindow,
                              QWidget, QPushButton, QHBoxLayout)
 
-class MainWindow(QMainWindow):
+import numpy as np
+from InvTools.Utils import makeGrid, maskGrid
+
+from LocWindow import LocWidget
+from DecayWindow import DecayWidget
+from GridWindow import GridWidget
+
+class ATEMViewMainWindow(QMainWindow):
     """ Docstring """
-    def __init__(self, parent):
+
+    selectedLocInd = -1
+    selectedTimeInd = -1
+
+    LocWindow = None
+    DecayWindow = None
+    GridWindow = None
+    grids = {}
+
+    def __init__(self, data):
         QMainWindow.__init__(self)
 
-        self.parent = parent
+        self.data = data
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.initUI()
@@ -17,6 +33,10 @@ class MainWindow(QMainWindow):
         self.btnLoc.clicked.connect(self.buttonClicked)
         self.btnDecay.clicked.connect(self.buttonClicked)
         self.btnGrid.clicked.connect(self.buttonClicked)
+
+        # Initialize the selection
+        self.setSelectedLocInd(self.data.locs.iloc[0].name)
+        self.setSelectedTimeInd(self.data.times.iloc[0].name)
 
         self.show()
 
@@ -45,31 +65,98 @@ class MainWindow(QMainWindow):
         """ Docstring """
         sender = self.sender()
         if sender.text() == "Loc":
-            self.parent.openLocWindow()
+            self.openLocWindow()
         elif sender.text() == "Decay":
-            self.parent.openDecayWindow()
+            self.openDecayWindow()
         elif sender.text() == "Grid":
-            self.parent.openGridWindow()
+            self.openGridWindow()
 
     def closeEvent(self, event):
-        self.parent.closeAll()
+        for window in [self.LocWindow, self.DecayWindow, self.GridWindow]:
+            if window is not None:
+                window.deleteLater()
+                window = None
         event.accept()
 
-if __name__ == '__main__':
+    def openLocWindow(self):
+        """ docstring """
+        if self.LocWindow is None:
+            self.LocWindow = LocWidget(self)
+            self.LocWindow.setAll(self.data.locs.x.values,
+                                  self.data.locs.y.values)
+            self.setSelectedLocInd(self.selectedLocInd)
+            self.setSelectedTimeInd(self.selectedTimeInd)
+        else:
+            self.LocWindow.toggleVisible()
 
-    from InvTools.ATEM import ATEMdata
-    from ATEMview import ATEMviewer
+    def openDecayWindow(self):
+        """ docstring """
+        if self.DecayWindow is None:
+            self.DecayWindow = DecayWidget(self)
+            self.setSelectedLocInd(self.selectedLocInd)
+            self.setSelectedTimeInd(self.selectedTimeInd)
+        else:
+            self.DecayWindow.toggleVisible()
 
-    # obsFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170512/Inv12_Blk1_R1/run2/obs.txt'
-    # predFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170512/Inv12_Blk1_R1/run2/dpred.txt'
-    # dat = ATEMdata(obsFile, predFile)
-    dat = ATEMdata()
-    dat.readPkl('/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170512/Inv12_Blk1_R1/run2/ATEM.pkl')
+    def openGridWindow(self):
+        """ docstring """
+        if self.GridWindow is None:
+            self.GridWindow = GridWidget(self)
+            self.setSelectedLocInd(self.selectedLocInd)
+            self.setSelectedTimeInd(self.selectedTimeInd)
+        else:
+            self.GridWindow.toggleVisible()
 
-    app = QApplication(sys.argv)
-    ATEM = ATEMviewer(dat)
+    def setSelectedLocInd(self, locInd):
+        """ docstring """
+        if locInd in self.data.locs.index:
+            self.selectedLocInd = locInd
+            selectedLocation = self.data.locs.loc[locInd]
+            selectedDecay = self.data.getLoc(locInd)
 
-    # aw = ApplicationWindow(dat)
-    # aw.setWindowTitle("PyQt5 Matplot Example")
-    # aw.show()
-    app.exec_()
+            if self.LocWindow is not None:
+                self.LocWindow.setSel(selectedLocation.x, selectedLocation.y)
+            if self.DecayWindow is not None:
+                self.DecayWindow.setDecay(selectedDecay)
+
+    def setSelectedTimeInd(self, timeInd):
+        """ docstring """
+
+        if timeInd in self.data.times.index:
+            self.selectedTimeInd = timeInd
+            if self.GridWindow is not None:
+                if timeInd not in self.grids:
+                    dt = self.data.getTime(timeInd)
+                    xv, yv, GrdObs = makeGrid(dt.x, dt.y, dt.dBdt_Z, nc=256, method="cubic")
+                    _, _, GrdPred = makeGrid(dt.x, dt.y, dt.dBdt_Z_pred, nc=256, method="cubic")
+                    mask = ~maskGrid(dt.x.values, dt.y.values, xv, yv, 100.)
+                    GrdObs[mask] = np.nan
+                    GrdPred[mask] = np.nan
+                    self.grids[timeInd] = [xv, yv, GrdObs, GrdPred]
+                self.GridWindow.setGrid(*self.grids[timeInd])
+
+    @QtCore.pyqtSlot(dict)
+    def get_event(self, event):
+        """ docstring """
+
+        if event['name'] == 'locClicked':
+            closestLoc = self.getClosestLoc(event['xdata'], event['ydata'])
+            self.setSelectedLocInd(closestLoc)
+        elif event['name'] == 'nextLocInd':
+            self.setSelectedLocInd(self.selectedLocInd + 1)
+        elif event['name'] == 'prevLocInd':
+            self.setSelectedLocInd(self.selectedLocInd - 1)
+        elif event['name'] == 'nextTimeInd':
+            self.setSelectedTimeInd(self.selectedTimeInd + 1)
+        elif event['name'] == 'prevTimeInd':
+            self.setSelectedTimeInd(self.selectedTimeInd - 1)
+        else:
+            print(event['name'])
+
+    def getClosestLoc(self, x, y):
+        """ docstring """
+        dx = self.data.locs.x - x
+        dy = self.data.locs.y - y
+        r = np.sqrt(dx**2 + dy**2)
+        closestInd = r.argmin()
+        return closestInd

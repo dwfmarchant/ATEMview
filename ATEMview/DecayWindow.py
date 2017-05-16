@@ -74,18 +74,3 @@ class DecayWidget(QWidget):
         """ docstring """
         self.lc.timePlot.set_data([time, time], [1e-20, 10])
         self.lc.draw()
-
-if __name__ == '__main__':
-
-    from PyQt5.QtWidgets import QApplication
-    from ATEMview import ATEMviewer
-    from InvTools.ATEM import ATEMdata
-
-    obsFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170508/Inv11_NWtrial/obs.txt'
-    predFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170508/Inv11_NWtrial/dpred.txt'
-
-    dat = ATEMdata(obsFile, predFile)
-
-    app = QApplication([])
-    ATEM = ATEMviewer(dat)
-    app.exec_()

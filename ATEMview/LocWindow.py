@@ -81,19 +81,3 @@ class LocWidget(QWidget):
             print('Right Arrow Pressed')
             signal = {'name':'prevLocInd'}
             self.prevLocInd.emit(signal)
-
-if __name__ == '__main__':
-
-
-    from PyQt5.QtWidgets import QApplication
-    from ATEMview import ATEMviewer
-    from InvTools.ATEM import ATEMdata
-
-    obsFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170425/Inv1_HMprelim/obs.txt'
-    predFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170425/Inv1_HMprelim/dpred.txt'
-
-    dat = ATEMdata(obsFile, predFile)
-
-    app = QApplication([])
-    ATEM = ATEMviewer(dat)
-    app.exec_()

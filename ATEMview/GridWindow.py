@@ -145,22 +145,3 @@ class GridWidget(QWidget):
         elif key == Qt.Key_Down:
             signal = {'name':'prevTimeInd'}
             self.prevLocInd.emit(signal)
-
-
-if __name__ == '__main__':
-
-
-    from PyQt5.QtWidgets import QApplication
-    from ATEMview import ATEMviewer
-    from InvTools.ATEM import ATEMdata
-
-
-    obsFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170512/Inv12_Blk1_R1/run2/ATEM.pkl'
-    # obsFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170425/Inv1_HMprelim/obs.pkl'
-
-    dat = ATEMdata(obsFile)
-
-    app = QApplication([])
-    ATEM = ATEMviewer(dat)
-    # ATEM.openGridWindow()
-    app.exec_()
