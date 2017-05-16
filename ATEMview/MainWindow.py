@@ -39,9 +39,6 @@ class MainWindow(QMainWindow):
 
         self.statusBar().showMessage("", 2000)
 
-        self.move(-600, 100)
-        self.show()
-
     def buttonClicked(self):
         """ Docstring """
         sender = self.sender()
@@ -58,10 +55,11 @@ if __name__ == '__main__':
     from InvTools.ATEM import ATEMdata
     from ATEMview import ATEMviewer
 
-    obsFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170512/Inv12_Blk1_R1/run2/obs.txt'
-    predFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170512/Inv12_Blk1_R1/run2/dpred.txt'
-
-    dat = ATEMdata(obsFile, predFile)
+    # obsFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170512/Inv12_Blk1_R1/run2/obs.txt'
+    # predFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170512/Inv12_Blk1_R1/run2/dpred.txt'
+    # dat = ATEMdata(obsFile, predFile)
+    dat = ATEMdata()
+    dat.readPkl('/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170512/Inv12_Blk1_R1/run2/ATEM.pkl')
 
     app = QApplication(sys.argv)
     ATEM = ATEMviewer(dat)

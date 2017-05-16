@@ -13,7 +13,7 @@ class LocsCanvas(Canvas):
         """Docstring"""
         super().__init__(parent, width, height, dpi)
         self.axes.set_aspect('equal')
-        
+
     def initPlot(self):
         """Docstring"""
         self.selPlot, = self.axes.plot([], [], 'o', c='r', ms=2.)
@@ -42,17 +42,14 @@ class LocWidget(QWidget):
         self.nextLocInd.connect(parent.get_event)
         self.prevLocInd.connect(parent.get_event)
         self.show()
-        
+
     def init_ui(self):
         """ Docstring """
-        self.lc = LocsCanvas(parent=self, width=5, height=4, dpi=100)        
+        self.lc = LocsCanvas(parent=self, width=5, height=4, dpi=100)
         toolbar = NavigationToolbar(self.lc, self, coordinates=False)
         l = QVBoxLayout(self)
         l.addWidget(self.lc)
         l.addWidget(toolbar)
-
-        # self.move(10, 5)
-        self.move(-2000, -400)
 
     def toggleVisible(self):
         """ docstring """

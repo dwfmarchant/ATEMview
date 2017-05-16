@@ -42,9 +42,6 @@ class DecayWidget(QWidget):
         l.addWidget(self.lc)
         l.addWidget(toolbar)
 
-        # self.move(600., 5.)
-        self.move(-1000, -400)
-
     def toggleVisible(self):
         """ docstring """
         if self.isVisible():

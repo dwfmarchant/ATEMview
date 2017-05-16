@@ -6,12 +6,13 @@ import numpy as np
 from InvTools.Utils import makeGrid, maskGrid
 
 from MainWindow import MainWindow
+from DataLoadDialog import DataLoadDialog
 from LocWindow import LocWidget
 from DecayWindow import DecayWidget
 from GridWindow import GridWidget
 
 class ATEMviewer(object):
-    """docstring for ATEMviewer"""
+    """ docstring for ATEMviewer """
 
     selectedLocInd = -1
     selectedTimeInd = -1
@@ -21,13 +22,19 @@ class ATEMviewer(object):
     GridWindow = None
     grids = {}
 
-    def __init__(self, data):
+    def __init__(self, data=None):
 
-        # Store data
-        self.data = data
 
-        # Initial the Gui
+        # Initialize the Gui
         self.MainWindow = MainWindow(self)
+
+        # Launch the loader
+        if data is None:
+            dataLoader = DataLoadDialog(self.MainWindow)
+            dataLoader.exec_()
+            self.data = dataLoader.data
+        else:
+            self.data = data
 
         # Initialize the selection
         self.setSelectedLocInd(self.data.locs.iloc[0].name)
@@ -118,20 +125,12 @@ class ATEMviewer(object):
         return closestInd
 
 
+
+
 if __name__ == '__main__':
 
     from InvTools.ATEM import ATEMdata
 
-    obsFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170425/Inv1_HMprelim/obs.txt'
-    predFile = '/Users/dmarchant/Dropbox (CGI)/Projects2017/BlackwellHPX/Inv/20170425/Inv1_HMprelim/dpred.txt'
-
-    dat = ATEMdata(obsFile, predFile)
-
     app = QApplication(sys.argv)
-    ATEM = ATEMviewer(dat)
-    ATEM.openGridWindow()
-
-    # aw = ApplicationWindow(dat)
-    # aw.setWindowTitle("PyQt5 Matplot Example")
-    # aw.show()
+    ATEM = ATEMviewer()
     app.exec_()
