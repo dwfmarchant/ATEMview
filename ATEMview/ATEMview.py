@@ -24,17 +24,16 @@ class ATEMviewer(object):
 
     def __init__(self, data=None):
 
-
-        # Initialize the Gui
-        self.MainWindow = MainWindow(self)
-
         # Launch the loader
         if data is None:
-            dataLoader = DataLoadDialog(self.MainWindow)
+            dataLoader = DataLoadDialog()
             dataLoader.exec_()
             self.data = dataLoader.data
         else:
             self.data = data
+
+        # Initialize the Gui
+        self.MainWindow = MainWindow(self)
 
         # Initialize the selection
         self.setSelectedLocInd(self.data.locs.iloc[0].name)
@@ -123,9 +122,6 @@ class ATEMviewer(object):
         r = np.sqrt(dx**2 + dy**2)
         closestInd = r.argmin()
         return closestInd
-
-
-
 
 if __name__ == '__main__':
 

@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt5.QtWidgets import (QDialog, QPushButton, QLineEdit,
                              QLabel, QHBoxLayout, QVBoxLayout)
 from PyQt5.QtCore import QEvent
@@ -55,9 +56,15 @@ class DataLoadDialog(QDialog):
         predFname = self.predText.text()
 
         if obsFname.startswith('file://'):
-            obsFname = obsFname[7:]
+            if os.name=='nt':
+                obsFname = obsFname[8:]
+            elif os.name=='posix':
+                obsFname = obsFname[7:]
         if predFname.startswith('file://'):
-            predFname = predFname[7:]
+            if os.name=='nt':
+                predFname = predFname[8:]
+            elif os.name=='posix':
+                predFname = predFname[7:]
 
         self.data = ATEMdata(obsFname, predFname)
         self.accept()

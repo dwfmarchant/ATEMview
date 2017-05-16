@@ -18,6 +18,8 @@ class MainWindow(QMainWindow):
         self.btnDecay.clicked.connect(self.buttonClicked)
         self.btnGrid.clicked.connect(self.buttonClicked)
 
+        self.show()
+
     def initUI(self):
         """ Docstring """
         self.setWindowTitle("application main window")
