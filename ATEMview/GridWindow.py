@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QSizePolicy
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+import numpy as np
 
 class GridCanvas(FigureCanvas):
     """ Docstring """
@@ -14,31 +15,42 @@ class GridCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         """ Docstring """
 
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.obs_axes = fig.add_subplot(121)
-        self.pred_axes = fig.add_subplot(122)
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
 
-        FigureCanvas.__init__(self, fig)
+        FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
         FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
-        self.mpl_connect('button_press_event', self.onClick)
+        self.obs_axes = self.fig.add_subplot(121, aspect='equal')
+        self.obs_im = self.obs_axes.imshow([[0.]], origin='lower', cmap='jet', interpolation='bilinear')
+        # self.fig.colorbar(self.obs_im)
 
-        self.obs_axes.set_aspect('equal')
-        self.pred_axes.set_aspect('equal')
+        self.pred_axes = self.fig.add_subplot(122, aspect='equal')
+        self.pred_im = self.pred_axes.imshow([[0.]], origin='lower', cmap='jet')
+        # self.fig.colorbar(self.pred_im)
+
+        self.mpl_connect('button_press_event', self.onClick)
 
         self.draw()
 
 
     def showGrid(self, xv, yv, GrdObs, GrdPred):
         """Docstring"""
-        self.obs_axes.cla()
-        self.obs_axes.contourf(xv, yv, GrdObs)
 
-        self.pred_axes.cla()
-        self.pred_axes.contourf(xv, yv, GrdPred)
+        vmin = np.nanmin(GrdObs)
+        vmax = np.nanmax(GrdObs)
+
+        self.obs_im.set_data(GrdObs)
+        self.obs_im.set_extent((xv[0], xv[-1], yv[0], yv[-1]))
+        self.obs_im.set_clim(vmin, vmax)
+
+
+        self.pred_im.set_data(GrdPred)
+        self.pred_im.set_extent((xv[0], xv[-1], yv[0], yv[-1]))
+        self.pred_im.set_clim(vmin, vmax)
+
         self.draw()
 
     def onClick(self, event):
