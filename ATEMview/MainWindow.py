@@ -117,6 +117,8 @@ class ATEMViewMainWindow(QMainWindow):
                 self.LocWindow.setLocation(selectedLoc)
             if self.DecayWindow is not None:
                 self.DecayWindow.setLocation(selectedLoc)
+            if self.GridWindow is not None:
+                self.GridWindow.setLocation(selectedLoc)
 
     def setSelectedTimeInd(self, timeInd):
         """ docstring """

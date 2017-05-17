@@ -19,6 +19,8 @@ class LocsCanvas(Canvas):
         """Docstring"""
         self.selPlot, = self.axes.plot([], [], 'o', c='r', ms=2.)
         self.allPlot, = self.axes.plot([], [], 'o', c='k', ms=1.)
+        self.selCrossX, = self.axes.plot([], [], '--', c='r', lw=0.5, zorder=0)
+        self.selCrossY, = self.axes.plot([], [], '--', c='r', lw=0.5, zorder=0)
 
     def onClick(self, event):
         """ Docstring """
@@ -62,4 +64,7 @@ class LocWidget(ATEMWidget):
         x = loc.iloc[0].x
         y = loc.iloc[0].y
         self.lc.selPlot.set_data(x, y)
+        self.lc.selCrossX.set_data(self.lc.axes.get_xlim(),[y,y])
+        self.lc.selCrossY.set_data([x,x],self.lc.axes.get_ylim())
         self.lc.draw()
+

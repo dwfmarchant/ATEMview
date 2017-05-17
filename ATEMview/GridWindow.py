@@ -31,10 +31,14 @@ class GridCanvas(FigureCanvas):
 
         self.obs_axes = self.fig.add_subplot(121, aspect='equal')
         self.obs_im = self.obs_axes.imshow([[0.]], **imshowOpts)
+        self.selCrossXobs, = self.obs_axes.plot([], [], '--', c='r', lw=0.5, zorder=0)
+        self.selCrossYobs, = self.obs_axes.plot([], [], '--', c='r', lw=0.5, zorder=0)
         self.fig.colorbar(self.obs_im)
 
         self.pred_axes = self.fig.add_subplot(122, aspect='equal')
         self.pred_im = self.pred_axes.imshow([[0.]], **imshowOpts)
+        self.selCrossXpred, = self.pred_axes.plot([], [], '--', c='r', lw=0.5, zorder=0)
+        self.selCrossYpred, = self.pred_axes.plot([], [], '--', c='r', lw=0.5, zorder=0)
         self.fig.colorbar(self.pred_im)
 
         self.mpl_connect('button_press_event', self.onClick)
@@ -115,6 +119,16 @@ class GridWidget(ATEMWidget):
 
         dv = self.absMaxValue-self.absMinValue
         self.gc.setClim(self.absMinValue+dv*lsVal/100., self.absMinValue+dv*hsVal/100.,)
+
+    def setLocation(self, loc):
+        """ Docstring """
+        x = loc.iloc[0].x
+        y = loc.iloc[0].y
+        self.gc.selCrossXobs.set_data(self.gc.obs_axes.get_xlim(),[y,y])
+        self.gc.selCrossYobs.set_data([x,x],self.gc.obs_axes.get_ylim())
+        self.gc.selCrossXpred.set_data(self.gc.pred_axes.get_xlim(),[y,y])
+        self.gc.selCrossYpred.set_data([x,x],self.gc.pred_axes.get_ylim())
+        self.gc.draw()
 
     def setGrid(self, xv, yv, GrdObs, GrdPred):
         self.gc.showGrid(xv, yv, GrdObs, GrdPred)
