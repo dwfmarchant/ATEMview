@@ -49,14 +49,14 @@ class DecayWidget(QWidget):
         else:
             self.show()
 
-    def setDecay(self, sounding):
+    def setLocation(self, loc):
         """ Docstring """
 
-        t = sounding.t.values
-        obs = sounding.dBdt_Z.values
-        pred = sounding.dBdt_Z_pred.values
-        lower = obs - sounding.dBdt_Z_uncert.values
-        upper = obs + sounding.dBdt_Z_uncert.values
+        t = loc.t.values
+        obs = loc.dBdt_Z.values
+        pred = loc.dBdt_Z_pred.values
+        lower = obs - loc.dBdt_Z_uncert.values
+        upper = obs + loc.dBdt_Z_uncert.values
 
         self.lc.obsPlot.set_data(t, obs)
         self.lc.predPlot.set_data(t, pred)

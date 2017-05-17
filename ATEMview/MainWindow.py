@@ -111,13 +111,12 @@ class ATEMViewMainWindow(QMainWindow):
         """ docstring """
         if locInd in self.data.locs.index:
             self.selectedLocInd = locInd
-            selectedLocation = self.data.locs.loc[locInd]
-            selectedDecay = self.data.getLoc(locInd)
+            selectedLoc = self.data.getLoc(locInd)
 
             if self.LocWindow is not None:
-                self.LocWindow.setSel(selectedLocation.x, selectedLocation.y)
+                self.LocWindow.setLocation(selectedLoc)
             if self.DecayWindow is not None:
-                self.DecayWindow.setDecay(selectedDecay)
+                self.DecayWindow.setLocation(selectedLoc)
 
     def setSelectedTimeInd(self, timeInd):
         """ docstring """

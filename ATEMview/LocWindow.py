@@ -65,8 +65,10 @@ class LocWidget(QWidget):
         self.lc.axes.set_ylim(y.min()-100., y.max()+100.)
         self.lc.draw()
 
-    def setSel(self, x, y):
+    def setLocation(self, loc):
         """ Docstring """
+        x = loc.iloc[0].x
+        y = loc.iloc[0].y
         self.lc.selPlot.set_data(x, y)
         self.lc.draw()
 
