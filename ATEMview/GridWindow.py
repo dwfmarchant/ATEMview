@@ -56,7 +56,10 @@ class GridCanvas(FigureCanvas):
         self.obs_im.set_clim(vmin, vmax)
 
 
-        self.pred_im.set_data(GrdPred)
+        if GrdPred:
+            self.pred_im.set_data(GrdPred)
+        else:
+            self.pred_im.set_data(np.nan*np.ones((2,2)))
         self.pred_im.set_extent((xv[0], xv[-1], yv[0], yv[-1]))
         self.pred_im.set_clim(vmin, vmax)
 
