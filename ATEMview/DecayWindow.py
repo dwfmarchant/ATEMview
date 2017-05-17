@@ -11,7 +11,6 @@ class DecayWidget(ATEMWidget):
         super().__init__(parent)
         self.parent = parent
         self.init_ui()
-        self.init_signals()
         self.show()
 
     def init_ui(self):
@@ -24,15 +23,13 @@ class DecayWidget(ATEMWidget):
         self.canvas.axes.legend()
         self.canvas.axes.set_yscale('log')
         self.canvas.axes.set_xscale('log')
+        self.canvas.canvasClicked.connect(self.canvasClicked)
 
         toolbar = NavigationToolbar(self.canvas, self, coordinates=False)
 
         l = QtWidgets.QVBoxLayout(self)
         l.addWidget(self.canvas)
         l.addWidget(toolbar)
-
-    def init_signals(self):
-        self.canvas.canvasClicked.connect(self.canvasClicked)
 
     @QtCore.pyqtSlot(dict)
     def canvasClicked(self, event):

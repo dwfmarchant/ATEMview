@@ -1,15 +1,14 @@
 
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5 import QtWidgets, QtCore
 
-class ATEMWidget(QWidget):
+class ATEMWidget(QtWidgets.QWidget):
     """docstring for ATEMWidget."""
 
-    keyPressSignal = pyqtSignal(dict, name='keyPress')
+    ChangeSelectionSignal = QtCore.pyqtSignal(dict, name='ChangeSelection')
 
     def __init__(self, parent):
         super(ATEMWidget, self).__init__()
-        self.keyPressSignal.connect(parent.get_event)
+        self.ChangeSelectionSignal.connect(parent.get_event)
 
     def toggleVisible(self):
         """ Toggle widget visiblity """
@@ -21,14 +20,14 @@ class ATEMWidget(QWidget):
     def keyPressEvent(self, event):
         """ Docstring """
         key = event.key()
-        if key == Qt.Key_Right:
+        if key == QtCore.Qt.Key_Right:
             signal = {'name':'nextLocInd'}
-        elif key == Qt.Key_Left:
+        elif key == QtCore.Qt.Key_Left:
             signal = {'name':'prevLocInd'}
-        elif key == Qt.Key_Up:
+        elif key == QtCore.Qt.Key_Up:
             signal = {'name':'nextTimeInd'}
-        elif key == Qt.Key_Down:
+        elif key == QtCore.Qt.Key_Down:
             signal = {'name':'prevTimeInd'}
         else:
             return
-        self.keyPressSignal.emit(signal)
+        self.ChangeSelectionSignal.emit(signal)

@@ -145,8 +145,8 @@ class ATEMViewMainWindow(QMainWindow):
     def get_event(self, event):
         """ docstring """
 
-        if event['name'] == 'locClicked':
-            closestLoc = self.data.getClosestLocInd(event['xdata'], event['ydata'])
+        if event['name'] == 'closestLoc':
+            closestLoc = self.data.getClosestLocInd(event['x'], event['y'])
             self.setSelectedLocInd(closestLoc)
         elif event['name'] == 'nextLocInd':
             self.setSelectedLocInd(self.selectedLocInd + 1)
