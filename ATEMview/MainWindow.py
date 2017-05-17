@@ -133,6 +133,8 @@ class ATEMViewMainWindow(QMainWindow):
                     GrdPred[mask] = np.nan
                     self.grids[timeInd] = [xv, yv, GrdObs, GrdPred]
                 self.GridWindow.setGrid(*self.grids[timeInd])
+            if self.DecayWindow is not None:
+                self.DecayWindow.setTime(self.data.times.loc[timeInd])
 
     @QtCore.pyqtSlot(dict)
     def get_event(self, event):

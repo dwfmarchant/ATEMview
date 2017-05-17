@@ -1,8 +1,9 @@
 
-from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtWidgets import QVBoxLayout, QWidget
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QVBoxLayout
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from Canvas import Canvas
+from ATEMWidget import ATEMWidget
 
 class LocsCanvas(Canvas):
     """ Docstring """
@@ -28,19 +29,14 @@ class LocsCanvas(Canvas):
                       'ydata':event.ydata}
             self.locClicked.emit(signal)
 
-class LocWidget(QWidget):
+class LocWidget(ATEMWidget):
     """docstring for LocWidget"""
 
-    nextLocInd = pyqtSignal(dict, name='nextLocInd')
-    prevLocInd = pyqtSignal(dict, name='prevLocInd')
-
     def __init__(self, parent):
-        super(LocWidget, self).__init__()
+        super(LocWidget, self).__init__(parent)
         self.parent = parent
         self.init_ui()
-        self.lc.locClicked.connect(parent.get_event)
-        self.nextLocInd.connect(parent.get_event)
-        self.prevLocInd.connect(parent.get_event)
+        self.init_signals()
         self.show()
 
     def init_ui(self):
@@ -51,12 +47,8 @@ class LocWidget(QWidget):
         l.addWidget(self.lc)
         l.addWidget(toolbar)
 
-    def toggleVisible(self):
-        """ docstring """
-        if self.isVisible():
-            self.hide()
-        else:
-            self.show()
+    def init_signals(self):
+        self.lc.locClicked.connect(self.parent.get_event)
 
     def setAll(self, x, y):
         """ Docstring """
@@ -71,15 +63,3 @@ class LocWidget(QWidget):
         y = loc.iloc[0].y
         self.lc.selPlot.set_data(x, y)
         self.lc.draw()
-
-    def keyPressEvent(self, event):
-        """ Docstring """
-        key = event.key()
-        if key == Qt.Key_Right:
-            print('Right Arrow Pressed')
-            signal = {'name':'nextLocInd'}
-            self.nextLocInd.emit(signal)
-        elif key == Qt.Key_Left:
-            print('Right Arrow Pressed')
-            signal = {'name':'prevLocInd'}
-            self.prevLocInd.emit(signal)

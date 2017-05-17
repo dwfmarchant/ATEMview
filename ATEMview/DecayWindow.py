@@ -1,9 +1,10 @@
 
 import numpy as np
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QVBoxLayout
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from Canvas import Canvas
+from ATEMWidget import ATEMWidget
 
 class DecayCanvas(Canvas):
     """ Docstring """
@@ -21,33 +22,29 @@ class DecayCanvas(Canvas):
         self.obsPlot, = self.axes.plot([], [], '-o', c='k', ms=2., label="Obs")
         self.predPlot, = self.axes.plot([], [], '-o', c='r', ms=2., label="Pred")
         self.uncertBounds = self.axes.fill_between([], [], alpha=0.3, color='k')
-        self.timePlot, = self.axes.plot([], [], '-', color='green', zorder = -1)
+        self.timePlot, = self.axes.plot([], [], ':', color='green', zorder = -1)
         self.axes.legend()
 
-class DecayWidget(QWidget):
+class DecayWidget(ATEMWidget):
     """docstring for LocWidget"""
     def __init__(self, parent):
-        super(DecayWidget, self).__init__()
+        super(DecayWidget, self).__init__(parent)
         self.parent = parent
         self.init_ui()
-        self.lc.locClicked.connect(parent.get_event)
+        self.init_signals()
         self.show()
 
     def init_ui(self):
         """ Docstring """
-        self.lc = DecayCanvas(parent=self, width=5, height=4, dpi=100)
-        toolbar = NavigationToolbar(self.lc, self, coordinates=False)
+        self.dc = DecayCanvas(parent=self, width=5, height=4, dpi=100)
+        toolbar = NavigationToolbar(self.dc, self, coordinates=False)
 
         l = QVBoxLayout(self)
-        l.addWidget(self.lc)
+        l.addWidget(self.dc)
         l.addWidget(toolbar)
 
-    def toggleVisible(self):
-        """ docstring """
-        if self.isVisible():
-            self.hide()
-        else:
-            self.show()
+    def init_signals(self):
+        self.dc.locClicked.connect(self.parent.get_event)
 
     def setLocation(self, loc):
         """ Docstring """
@@ -58,19 +55,20 @@ class DecayWidget(QWidget):
         lower = obs - loc.dBdt_Z_uncert.values
         upper = obs + loc.dBdt_Z_uncert.values
 
-        self.lc.obsPlot.set_data(t, obs)
-        self.lc.predPlot.set_data(t, pred)
+        self.dc.obsPlot.set_data(t, obs)
+        self.dc.predPlot.set_data(t, pred)
 
         tv = np.r_[t[0], t, t[-1], t[::-1], t[0]]
         v = np.r_[lower[0], upper, lower[-1], lower[::-1], lower[0]]
-        self.lc.uncertBounds.set_paths([np.c_[tv, v]])
+        self.dc.uncertBounds.set_paths([np.c_[tv, v]])
 
-        self.lc.axes.set_xlim(t.min(), t.max())
-        self.lc.axes.set_ylim(sounding.dBdt_Z.min(), sounding.dBdt_Z.max())
-        self.lc.axes.set_title(sounding.locInd.iloc[0])
-        self.lc.draw()
+        self.dc.axes.set_xlim(t.min(), t.max())
+        self.dc.axes.set_ylim(loc.dBdt_Z.min(), loc.dBdt_Z.max())
+        self.dc.axes.set_title(loc.locInd.iloc[0])
+        self.dc.draw()
 
     def setTime(self, time):
         """ docstring """
-        self.lc.timePlot.set_data([time, time], [1e-20, 10])
-        self.lc.draw()
+        self.dc.timePlot.set_data([time, time], [1e-20, 1e20])
+        self.dc.draw()
+

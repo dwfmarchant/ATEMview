@@ -1,11 +1,12 @@
 
 from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtWidgets import QVBoxLayout, QWidget, QSlider
+from PyQt5.QtWidgets import QVBoxLayout, QSlider
 from PyQt5.QtWidgets import QSizePolicy
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import numpy as np
+from ATEMWidget import ATEMWidget
 
 class GridCanvas(FigureCanvas):
     """ Docstring """
@@ -15,7 +16,8 @@ class GridCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         """ Docstring """
 
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        # self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.fig = Figure()
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
@@ -38,7 +40,6 @@ class GridCanvas(FigureCanvas):
         self.mpl_connect('button_press_event', self.onClick)
 
         self.draw()
-
 
     def showGrid(self, xv, yv, GrdObs, GrdPred):
         """Docstring"""
@@ -70,19 +71,14 @@ class GridCanvas(FigureCanvas):
         self.pred_im.set_clim(minVal, maxVal)
         self.draw()
 
-class GridWidget(QWidget):
+class GridWidget(ATEMWidget):
     """docstring for GridWidget"""
 
-    nextLocInd = pyqtSignal(dict, name='nextLocInd')
-    prevLocInd = pyqtSignal(dict, name='prevLocInd')
-
     def __init__(self, parent):
-        super(GridWidget, self).__init__()
+        super(GridWidget, self).__init__(parent)
         self.parent = parent
         self.init_ui()
-        self.gc.locClicked.connect(parent.get_event)
-        self.nextLocInd.connect(parent.get_event)
-        self.prevLocInd.connect(parent.get_event)
+        self.init_signals()
         self.show()
 
     def init_ui(self):
@@ -107,6 +103,9 @@ class GridWidget(QWidget):
         l.addWidget(self.highSlider)
         l.addWidget(self.lowSlider)
 
+    def init_signals(self):
+        self.gc.locClicked.connect(self.parent.get_event)
+
     def setClim(self):
         lsVal = self.lowSlider.value()
         hsVal = self.highSlider.value()
@@ -117,31 +116,9 @@ class GridWidget(QWidget):
         dv = self.absMaxValue-self.absMinValue
         self.gc.setClim(self.absMinValue+dv*lsVal/100., self.absMinValue+dv*hsVal/100.,)
 
-    def toggleVisible(self):
-        """ docstring """
-        if self.isVisible():
-            self.hide()
-        else:
-            self.show()
-
     def setGrid(self, xv, yv, GrdObs, GrdPred):
         self.gc.showGrid(xv, yv, GrdObs, GrdPred)
         self.absMinValue = np.nanmin(GrdObs)
         self.absMaxValue = np.nanmax(GrdObs)
         self.setClim()
 
-    def keyPressEvent(self, event):
-        """ Docstring """
-        key = event.key()
-        if key == Qt.Key_Right:
-            signal = {'name':'nextLocInd'}
-            self.nextLocInd.emit(signal)
-        elif key == Qt.Key_Left:
-            signal = {'name':'prevLocInd'}
-            self.prevLocInd.emit(signal)
-        elif key == Qt.Key_Up:
-            signal = {'name':'nextTimeInd'}
-            self.prevLocInd.emit(signal)
-        elif key == Qt.Key_Down:
-            signal = {'name':'prevTimeInd'}
-            self.prevLocInd.emit(signal)
