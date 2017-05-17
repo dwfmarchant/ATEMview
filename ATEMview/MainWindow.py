@@ -140,7 +140,7 @@ class ATEMViewMainWindow(QMainWindow):
         """ docstring """
 
         if event['name'] == 'locClicked':
-            closestLoc = self.getClosestLoc(event['xdata'], event['ydata'])
+            closestLoc = self.data.getClosestLocInd(event['xdata'], event['ydata'])
             self.setSelectedLocInd(closestLoc)
         elif event['name'] == 'nextLocInd':
             self.setSelectedLocInd(self.selectedLocInd + 1)
@@ -152,11 +152,3 @@ class ATEMViewMainWindow(QMainWindow):
             self.setSelectedTimeInd(self.selectedTimeInd - 1)
         else:
             print(event['name'])
-
-    def getClosestLoc(self, x, y):
-        """ docstring """
-        dx = self.data.locs.x - x
-        dy = self.data.locs.y - y
-        r = np.sqrt(dx**2 + dy**2)
-        closestInd = r.argmin()
-        return closestInd
