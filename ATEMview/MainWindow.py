@@ -1,15 +1,11 @@
 
-import sys
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import (QApplication, QMainWindow,
-                             QWidget, QPushButton, QHBoxLayout)
-from Utils import makeTimeChannelGrid
+from PyQt5 import QtCore, QtWidgets
 from LocWindow import LocWidget
 from DecayWindow import DecayWidget
 from GridWindow import GridWidget
 from GridWorker import GridWorker
 
-class ATEMViewMainWindow(QMainWindow):
+class ATEMViewMainWindow(QtWidgets.QMainWindow):
     """ Docstring """
 
     selectedLocInd = -1
@@ -21,7 +17,7 @@ class ATEMViewMainWindow(QMainWindow):
     grids = {}
 
     def __init__(self, data):
-        QMainWindow.__init__(self)
+        QtWidgets.QMainWindow.__init__(self)
 
         self.data = data
 
@@ -50,13 +46,13 @@ class ATEMViewMainWindow(QMainWindow):
         """ Docstring """
         self.setWindowTitle("application main window")
 
-        self.main_widget = QWidget(self)
+        self.main_widget = QtWidgets.QWidget(self)
 
-        self.btnLoc = QPushButton("Loc")
-        self.btnDecay = QPushButton("Decay")
-        self.btnGrid = QPushButton("Grid")
+        self.btnLoc = QtWidgets.QPushButton("Loc")
+        self.btnDecay = QtWidgets.QPushButton("Decay")
+        self.btnGrid = QtWidgets.QPushButton("Grid")
 
-        hbox = QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         hbox.addWidget(self.btnLoc)
         hbox.addWidget(self.btnDecay)
         hbox.addWidget(self.btnGrid)

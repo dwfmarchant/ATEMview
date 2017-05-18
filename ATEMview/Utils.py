@@ -2,7 +2,8 @@
 from InvTools.Utils import makeGrid, maskGrid
 import numpy as np
 
-def makeTimeChannelGrid(data_time, channel_name, number_cells=256, method="cubic", mask_radius=100., mask=None):
+def makeTimeChannelGrid(data_time, channel_name, number_cells=256, method="cubic",
+                        mask_radius=100., mask=None):
 
     if data_time[channel_name].isnull().all():
         grid = []

@@ -1,11 +1,9 @@
-import sys
+
 import os
-from PyQt5.QtWidgets import (QDialog, QPushButton, QLineEdit,
-                             QLabel, QHBoxLayout, QVBoxLayout)
-from PyQt5.QtCore import QEvent
+from PyQt5 import QtWidgets, QtCore
 from InvTools.ATEM import ATEMdata
 
-class DataLoadDialog(QDialog):
+class DataLoadDialog(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -15,36 +13,36 @@ class DataLoadDialog(QDialog):
 
     def initUI(self):
 
-        self.obsText = QLineEdit()
+        self.obsText = QtWidgets.QLineEdit()
         self.obsText.setDragEnabled(True)
         self.obsText.setAcceptDrops(True)
         self.obsText.installEventFilter(self)
 
-        obsLabel = QLabel('Obs File: ')
-        obsBrowsBtn = QPushButton('Browse')
+        obsLabel = QtWidgets.QLabel('Obs File: ')
+        obsBrowsBtn = QtWidgets.QPushButton('Browse')
 
 
-        self.predText = QLineEdit()
+        self.predText = QtWidgets.QLineEdit()
         self.predText.setDragEnabled(True)
         self.predText.setAcceptDrops(True)
         self.predText.installEventFilter(self)
-        predLabel = QLabel('Pred File: ')
-        predBrowsBtn = QPushButton('Browse')
+        predLabel = QtWidgets.QLabel('Pred File: ')
+        predBrowsBtn = QtWidgets.QPushButton('Browse')
 
-        loadBtn = QPushButton('Load')
+        loadBtn = QtWidgets.QPushButton('Load')
         loadBtn.clicked.connect(self.loadFiles)
 
-        ObsLayout = QHBoxLayout()
+        ObsLayout = QtWidgets.QHBoxLayout()
         ObsLayout.addWidget(obsLabel)
         ObsLayout.addWidget(self.obsText)
         ObsLayout.addWidget(obsBrowsBtn)
 
-        PredLayout = QHBoxLayout()
+        PredLayout = QtWidgets.QHBoxLayout()
         PredLayout.addWidget(predLabel)
         PredLayout.addWidget(self.predText)
         PredLayout.addWidget(predBrowsBtn)
 
-        vlayout = QVBoxLayout()
+        vlayout = QtWidgets.QVBoxLayout()
         vlayout.addLayout(ObsLayout)
         vlayout.addLayout(PredLayout)
         vlayout.addWidget(loadBtn)
@@ -71,7 +69,7 @@ class DataLoadDialog(QDialog):
 
     def eventFilter(self, object, event):
         if (object is self.obsText) | (object is self.predText):
-            if (event.type() == QEvent.DragEnter):
+            if (event.type() == QtCore.QEvent.DragEnter):
                 if event.mimeData().hasUrls():
                     event.accept()
                 else:

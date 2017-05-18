@@ -1,12 +1,12 @@
 
 import sys
-from PyQt5.QtWidgets import QApplication
+from PyQt5 import QtWidgets
 
 from MainWindow import ATEMViewMainWindow
 from DataLoadDialog import DataLoadDialog
 
 def main(data=None):
-    app = QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     if data is None:
         dataLoader = DataLoadDialog()
         dataLoader.exec_()
