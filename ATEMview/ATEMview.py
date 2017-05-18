@@ -13,8 +13,7 @@ def main(data=None):
         data = dataLoader.data
     else:
         data = data
-
-    ATEM = ATEMViewMainWindow(data)
+    ATEMViewMainWindow(data)
     app.exec_()
 
 if __name__ == '__main__':

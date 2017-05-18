@@ -8,6 +8,7 @@ class DataLoadDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
+        self.data = ATEMdata()
         self.initUI()
         self.show()
 
@@ -49,7 +50,7 @@ class DataLoadDialog(QtWidgets.QDialog):
 
         self.setLayout(vlayout)
 
-    def loadFiles(self, event):
+    def loadFiles(self):
         obsFname = self.obsText.text()
         predFname = self.predText.text()
 
@@ -67,8 +68,8 @@ class DataLoadDialog(QtWidgets.QDialog):
         self.data = ATEMdata(obsFname, predFname)
         self.accept()
 
-    def eventFilter(self, object, event):
-        if (object is self.obsText) | (object is self.predText):
+    def eventFilter(self, obj, event):
+        if (obj is self.obsText) | (obj is self.predText):
             if (event.type() == QtCore.QEvent.DragEnter):
                 if event.mimeData().hasUrls():
                     event.accept()

@@ -2,8 +2,8 @@
 from InvTools.Utils import makeGrid, maskGrid
 import numpy as np
 
-def makeTimeChannelGrid(data_time, channel_name, number_cells=256, method="cubic",
-                        mask_radius=100., mask=None):
+def make_time_channel_grid(data_time, channel_name,
+                           number_cells=256, method="cubic"):
 
     if data_time[channel_name].isnull().all():
         grid = []
@@ -15,8 +15,13 @@ def makeTimeChannelGrid(data_time, channel_name, number_cells=256, method="cubic
                                             data_time[channel_name],
                                             nc=number_cells,
                                             method=method)
-        if mask is None:
-            mask = ~maskGrid(data_time.x.values, data_time.y.values,
-                             x_vector, y_vector, mask_radius)
-        grid[mask] = np.nan
-    return x_vector, y_vector, grid, mask
+
+
+    return x_vector, y_vector, grid
+
+def mask_time_channel_grid(data_time, grid, x_vector, y_vector, mask_radius=100., mask=None):
+    if mask is None:
+        mask = ~maskGrid(data_time.x.values, data_time.y.values,
+                         x_vector, y_vector, mask_radius)
+    grid[mask] = np.nan
+    return grid, mask

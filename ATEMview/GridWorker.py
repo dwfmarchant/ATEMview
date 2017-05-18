@@ -1,7 +1,6 @@
 
 from PyQt5 import QtCore
-import numpy as np
-from Utils import makeTimeChannelGrid
+from Utils import make_time_channel_grid, mask_time_channel_grid
 
 class GridWorker(QtCore.QThread):
 
@@ -12,18 +11,19 @@ class GridWorker(QtCore.QThread):
         self.tInds = data.times.index
         self.data = data
         self.ch = ch
-        self.mask = None
         self.grdOpts = {'number_cells':256,
-                        'method':"cubic",
-                        'mask_radius':100.}
+                        'method':"cubic"}
+        self.mask_radius = 100.
+        self.mask = None
 
     def __del__(self):
         self.wait()
 
     def make_grid(self, tInd):
         data_time = self.data.getTime(tInd)
-        x_vector, y_vector, grid, self.mask = makeTimeChannelGrid(data_time, self.ch,
-                                                                  mask=self.mask, **self.grdOpts)
+        x_vector, y_vector, grid = make_time_channel_grid(data_time, self.ch, **self.grdOpts)
+        grid, self.mask = mask_time_channel_grid(data_time, grid, x_vector, y_vector,
+                                                 mask_radius=self.mask_radius, mask=self.mask)
         signal = {'ch':self.ch,
                   'tInd':tInd,
                   'x_vector':x_vector,

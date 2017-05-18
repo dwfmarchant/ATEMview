@@ -110,7 +110,6 @@ class GridWidget(ATEMWidget):
             grid_obs = self.parent.gridStore['dBdt_Z'][tInd]['grid']
             x_vector = self.parent.gridStore['dBdt_Z'][tInd]['x_vector']
             y_vector = self.parent.gridStore['dBdt_Z'][tInd]['y_vector']
-
             self.obs_im.set_data(grid_obs)
             self.obs_im.set_extent((x_vector[0], x_vector[-1],
                                     y_vector[0], y_vector[-1]))
