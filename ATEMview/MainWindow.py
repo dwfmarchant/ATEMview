@@ -128,8 +128,8 @@ class ATEMViewMainWindow(QMainWindow):
             if self.GridWindow is not None:
                 if timeInd not in self.grids:
                     dt = self.data.getTime(timeInd)
-                    mask = ~maskGrid(dt.x.values, dt.y.values, xv, yv, 100.)
                     xv, yv, GrdObs = makeGrid(dt.x, dt.y, dt.dBdt_Z, nc=256, method="cubic")
+                    mask = ~maskGrid(dt.x.values, dt.y.values, xv, yv, 100.)
                     GrdObs[mask] = np.nan
                     if not dt.dBdt_Z_pred.isnull().all():
                         _, _, GrdPred = makeGrid(dt.x, dt.y, dt.dBdt_Z_pred, nc=256, method="cubic")

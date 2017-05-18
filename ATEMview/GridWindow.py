@@ -16,8 +16,7 @@ class GridCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         """ Docstring """
 
-        # self.fig = Figure(figsize=(width, height), dpi=dpi)
-        self.fig = Figure()
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
 
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
@@ -55,8 +54,7 @@ class GridCanvas(FigureCanvas):
         self.obs_im.set_extent((xv[0], xv[-1], yv[0], yv[-1]))
         self.obs_im.set_clim(vmin, vmax)
 
-
-        if GrdPred:
+        if np.any(GrdPred):
             self.pred_im.set_data(GrdPred)
         else:
             self.pred_im.set_data(np.nan*np.ones((2,2)))
