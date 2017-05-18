@@ -12,6 +12,10 @@ class GridWidget(ATEMWidget):
         super(GridWidget, self).__init__(parent)
         self.parent = parent
         self.init_ui()
+
+        self.absMinValue = 1e-20
+        self.absMaxValue = 1e20
+
         self.show()
 
     def init_ui(self):
@@ -102,30 +106,30 @@ class GridWidget(ATEMWidget):
 
         tInd = data_times.iloc[0].tInd
 
-        grid_obs = self.parent.gridStore['dBdt_Z'][tInd]['grid']
-        x_vector = self.parent.gridStore['dBdt_Z'][tInd]['x_vector']
-        y_vector = self.parent.gridStore['dBdt_Z'][tInd]['y_vector']
+        if 'dBdt_Z' in self.parent.gridStore:
+            grid_obs = self.parent.gridStore['dBdt_Z'][tInd]['grid']
+            x_vector = self.parent.gridStore['dBdt_Z'][tInd]['x_vector']
+            y_vector = self.parent.gridStore['dBdt_Z'][tInd]['y_vector']
 
-        self.obs_im.set_data(grid_obs)
-        self.obs_im.set_extent((x_vector[0], x_vector[-1],
-                                y_vector[0], y_vector[-1]))
+            self.obs_im.set_data(grid_obs)
+            self.obs_im.set_extent((x_vector[0], x_vector[-1],
+                                    y_vector[0], y_vector[-1]))
 
-        grid_pred = self.parent.gridStore['dBdt_Z_pred'][tInd]['grid']
-        x_vector = self.parent.gridStore['dBdt_Z_pred'][tInd]['x_vector']
-        y_vector = self.parent.gridStore['dBdt_Z_pred'][tInd]['y_vector']
+            self.absMinValue = np.nanmin(grid_obs)
+            self.absMaxValue = np.nanmax(grid_obs)
 
-        self.pred_im.set_data(grid_pred)
-        self.pred_im.set_extent((x_vector[0], x_vector[-1],
-                                y_vector[0], y_vector[-1]))
+        if 'dBdt_Z_pred' in self.parent.gridStore:
+            grid_pred = self.parent.gridStore['dBdt_Z_pred'][tInd]['grid']
+            x_vector = self.parent.gridStore['dBdt_Z_pred'][tInd]['x_vector']
+            y_vector = self.parent.gridStore['dBdt_Z_pred'][tInd]['y_vector']
 
-        # if np.any(GrdPred):
-            # self.pred_im.set_data(GrdPred)
-        # else:
-            # self.pred_im.set_data(np.nan*np.ones((2,2)))
-        # self.pred_im.set_extent((xv[0], xv[-1], yv[0], yv[-1]))
+            if np.any(grid_pred):
+                self.pred_im.set_data(grid_pred)
+                self.pred_im.set_extent((x_vector[0], x_vector[-1],
+                                         y_vector[0], y_vector[-1]))
+            else:
+                self.pred_im.set_data(np.nan*np.ones((2, 2)))
 
-        self.absMinValue = np.nanmin(grid_obs)
-        self.absMaxValue = np.nanmax(grid_obs)
         self.setClim()
         self.draw()
 
