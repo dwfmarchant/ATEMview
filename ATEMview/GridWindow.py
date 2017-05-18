@@ -25,7 +25,7 @@ class GridWidget(ATEMWidget):
                       'cmap':'jet',
                       'interpolation':'bilinear'}
 
-        self.obsCanvas = Canvas(parent=self, width=10, height=4, dpi=100)
+        self.obsCanvas = Canvas(parent=self)
         obsToolbar = NavigationToolbar(self.obsCanvas, self, coordinates=False)
         self.obs_im = self.obsCanvas.axes.imshow([[0.]], **imshowOpts)
         self.selCrossXobs, = self.obsCanvas.axes.plot([], [], '--', c='r', lw=0.5, zorder=0)
@@ -33,7 +33,7 @@ class GridWidget(ATEMWidget):
         self.obsCanvas.fig.colorbar(self.obs_im)
         self.obsCanvas.canvasClicked.connect(self.canvasClicked)
 
-        self.predCanvas = Canvas(parent=self, width=10, height=4, dpi=100)
+        self.predCanvas = Canvas(parent=self, share_ax=self.obsCanvas.axes)
         predToolbar = NavigationToolbar(self.predCanvas, self, coordinates=False)
         self.pred_im = self.predCanvas.axes.imshow([[0.]], **imshowOpts)
         self.selCrossXpred, = self.predCanvas.axes.plot([], [], '--', c='r', lw=0.5, zorder=0)
