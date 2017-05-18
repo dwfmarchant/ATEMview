@@ -137,7 +137,7 @@ class ATEMViewMainWindow(QMainWindow):
                     else:
                         GrdPred = []
                     self.grids[timeInd] = [xv, yv, GrdObs, GrdPred]
-                self.GridWindow.setGrid(*self.grids[timeInd])
+                self.GridWindow.setTime(*self.grids[timeInd])
             if self.DecayWindow is not None:
                 self.DecayWindow.setTime(self.data.times.loc[timeInd])
 
