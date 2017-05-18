@@ -98,19 +98,34 @@ class GridWidget(ATEMWidget):
         self.selCrossYpred.set_data([x,x],self.predCanvas.axes.get_ylim())
         self.draw()
 
-    def setTime(self, xv, yv, GrdObs, GrdPred):
+    def setTime(self, data_times):
 
-        self.obs_im.set_data(GrdObs)
-        self.obs_im.set_extent((xv[0], xv[-1], yv[0], yv[-1]))
+        tInd = data_times.iloc[0].tInd
 
-        if np.any(GrdPred):
-            self.pred_im.set_data(GrdPred)
-        else:
-            self.pred_im.set_data(np.nan*np.ones((2,2)))
-        self.pred_im.set_extent((xv[0], xv[-1], yv[0], yv[-1]))
+        grid_obs = self.parent.gridStore['dBdt_Z'][tInd]['grid']
+        x_vector = self.parent.gridStore['dBdt_Z'][tInd]['x_vector']
+        y_vector = self.parent.gridStore['dBdt_Z'][tInd]['y_vector']
 
-        self.absMinValue = np.nanmin(GrdObs)
-        self.absMaxValue = np.nanmax(GrdObs)
+        self.obs_im.set_data(grid_obs)
+        self.obs_im.set_extent((x_vector[0], x_vector[-1],
+                                y_vector[0], y_vector[-1]))
+
+        grid_pred = self.parent.gridStore['dBdt_Z_pred'][tInd]['grid']
+        x_vector = self.parent.gridStore['dBdt_Z_pred'][tInd]['x_vector']
+        y_vector = self.parent.gridStore['dBdt_Z_pred'][tInd]['y_vector']
+
+        self.pred_im.set_data(grid_pred)
+        self.pred_im.set_extent((x_vector[0], x_vector[-1],
+                                y_vector[0], y_vector[-1]))
+
+        # if np.any(GrdPred):
+            # self.pred_im.set_data(GrdPred)
+        # else:
+            # self.pred_im.set_data(np.nan*np.ones((2,2)))
+        # self.pred_im.set_extent((xv[0], xv[-1], yv[0], yv[-1]))
+
+        self.absMinValue = np.nanmin(grid_obs)
+        self.absMaxValue = np.nanmax(grid_obs)
         self.setClim()
         self.draw()
 
