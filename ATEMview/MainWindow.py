@@ -3,13 +3,12 @@ import sys
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import (QApplication, QMainWindow,
                              QWidget, QPushButton, QHBoxLayout)
-
 import numpy as np
-from InvTools.Utils import makeGrid, maskGrid
-
+from Utils import makeTimeChannelGrid
 from LocWindow import LocWidget
 from DecayWindow import DecayWidget
 from GridWindow import GridWidget
+from GridWorker import GridWorker
 
 class ATEMViewMainWindow(QMainWindow):
     """ Docstring """
@@ -27,12 +26,18 @@ class ATEMViewMainWindow(QMainWindow):
 
         self.data = data
 
+        self.gridStore = {}
+        self.gridWorker = GridWorker(self.data, 'Obs')
+        self.gridWorker.finishedGrid.connect(self.storeGrid)
+        self.gridWorker.start()
+
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.initUI()
 
         self.btnLoc.clicked.connect(self.buttonClicked)
         self.btnDecay.clicked.connect(self.buttonClicked)
         self.btnGrid.clicked.connect(self.buttonClicked)
+        self.btnTest.clicked.connect(self.buttonClicked)
 
         # Initialize the selection
         self.setSelectedLocInd(self.data.locs.iloc[0].name)
@@ -49,11 +54,13 @@ class ATEMViewMainWindow(QMainWindow):
         self.btnLoc = QPushButton("Loc")
         self.btnDecay = QPushButton("Decay")
         self.btnGrid = QPushButton("Grid")
+        self.btnTest = QPushButton("Test")
 
         hbox = QHBoxLayout()
         hbox.addWidget(self.btnLoc)
         hbox.addWidget(self.btnDecay)
         hbox.addWidget(self.btnGrid)
+        hbox.addWidget(self.btnTest)
         self.main_widget.setLayout(hbox)
 
         self.main_widget.setFocus()
@@ -61,15 +68,22 @@ class ATEMViewMainWindow(QMainWindow):
 
         self.statusBar().showMessage("", 2000)
 
+    @QtCore.pyqtSlot(dict)
+    def storeGrid(self, event):
+        self.gridStore[event['ti']] = event['grid']
+
     def buttonClicked(self):
         """ Docstring """
-        sender = self.sender()
-        if sender.text() == "Loc":
+        if self.sender() is self.btnLoc:
             self.openLocWindow()
-        elif sender.text() == "Decay":
+        elif self.sender() is self.btnDecay:
             self.openDecayWindow()
-        elif sender.text() == "Grid":
+        elif self.sender() is self.btnGrid:
             self.openGridWindow()
+        elif self.sender() is self.btnTest:
+            print('%%%%')
+            print(self.gridStore)
+            print('%%%%')
 
     def closeEvent(self, event):
         for window in [self.LocWindow, self.DecayWindow, self.GridWindow]:
@@ -126,14 +140,15 @@ class ATEMViewMainWindow(QMainWindow):
         if timeInd in self.data.times.index:
             self.selectedTimeInd = timeInd
             if self.GridWindow is not None:
+                mask = None
+                grid_opts = {'number_cells':256,
+                             'method':"cubic",
+                             'mask_radius':100.}
                 if timeInd not in self.grids:
                     dt = self.data.getTime(timeInd)
-                    xv, yv, GrdObs = makeGrid(dt.x, dt.y, dt.dBdt_Z, nc=256, method="cubic")
-                    mask = ~maskGrid(dt.x.values, dt.y.values, xv, yv, 100.)
-                    GrdObs[mask] = np.nan
+                    xv, yv, GrdObs, mask = makeTimeChannelGrid(dt, 'dBdt_Z', mask=mask, **grid_opts)
                     if not dt.dBdt_Z_pred.isnull().all():
-                        _, _, GrdPred = makeGrid(dt.x, dt.y, dt.dBdt_Z_pred, nc=256, method="cubic")
-                        GrdPred[mask] = np.nan
+                        xv, yv, GrdPred, mask = makeTimeChannelGrid(dt, 'dBdt_Z_pred',mask=mask, **grid_opts)
                     else:
                         GrdPred = []
                     self.grids[timeInd] = [xv, yv, GrdObs, GrdPred]
