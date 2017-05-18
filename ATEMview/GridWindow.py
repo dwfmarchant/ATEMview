@@ -4,6 +4,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 import numpy as np
 from ATEMWidget import ATEMWidget
 from Canvas import Canvas
+from GridWorker import GridWorker
 
 class GridWidget(ATEMWidget):
     """docstring for GridWidget"""
@@ -11,6 +12,8 @@ class GridWidget(ATEMWidget):
     def __init__(self, parent):
         super(GridWidget, self).__init__(parent)
         self.parent = parent
+        self.gridStore = {}
+        self.init_grids()
         self.init_ui()
 
         self.absMinValue = 1e-20
@@ -68,6 +71,24 @@ class GridWidget(ATEMWidget):
         l.addWidget(self.highSlider)
         l.addWidget(self.lowSlider)
 
+    def init_grids(self):
+
+        self.gridWorker_Obs = GridWorker(self.parent.data, 'dBdt_Z')
+        self.gridWorker_Obs.grdOpts['number_cells'] = 256
+        self.gridWorker_Obs.finishedGrid.connect(self.storeGrid)
+        self.gridWorker_Obs.start()
+
+        self.gridWorker_Pred = GridWorker(self.parent.data, 'dBdt_Z_pred')
+        self.gridWorker_Pred.grdOpts['number_cells'] = 256
+        self.gridWorker_Pred.finishedGrid.connect(self.storeGrid)
+        self.gridWorker_Pred.start()
+
+    @QtCore.pyqtSlot(dict)
+    def storeGrid(self, event):
+        if not event['ch'] in self.gridStore:
+            self.gridStore[event['ch']] = {}
+        self.gridStore[event['ch']][event['tInd']] = event
+
     def draw(self):
         self.obsCanvas.draw()
         self.predCanvas.draw()
@@ -106,10 +127,10 @@ class GridWidget(ATEMWidget):
 
         tInd = data_times.iloc[0].tInd
 
-        if 'dBdt_Z' in self.parent.gridStore:
-            grid_obs = self.parent.gridStore['dBdt_Z'][tInd]['grid']
-            x_vector = self.parent.gridStore['dBdt_Z'][tInd]['x_vector']
-            y_vector = self.parent.gridStore['dBdt_Z'][tInd]['y_vector']
+        if 'dBdt_Z' in self.gridStore:
+            grid_obs = self.gridStore['dBdt_Z'][tInd]['grid']
+            x_vector = self.gridStore['dBdt_Z'][tInd]['x_vector']
+            y_vector = self.gridStore['dBdt_Z'][tInd]['y_vector']
             self.obs_im.set_data(grid_obs)
             self.obs_im.set_extent((x_vector[0], x_vector[-1],
                                     y_vector[0], y_vector[-1]))
@@ -117,10 +138,10 @@ class GridWidget(ATEMWidget):
             self.absMinValue = np.nanmin(grid_obs)
             self.absMaxValue = np.nanmax(grid_obs)
 
-        if 'dBdt_Z_pred' in self.parent.gridStore:
-            grid_pred = self.parent.gridStore['dBdt_Z_pred'][tInd]['grid']
-            x_vector = self.parent.gridStore['dBdt_Z_pred'][tInd]['x_vector']
-            y_vector = self.parent.gridStore['dBdt_Z_pred'][tInd]['y_vector']
+        if 'dBdt_Z_pred' in self.gridStore:
+            grid_pred = self.gridStore['dBdt_Z_pred'][tInd]['grid']
+            x_vector = self.gridStore['dBdt_Z_pred'][tInd]['x_vector']
+            y_vector = self.gridStore['dBdt_Z_pred'][tInd]['y_vector']
 
             if np.any(grid_pred):
                 self.pred_im.set_data(grid_pred)

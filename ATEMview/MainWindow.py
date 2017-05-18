@@ -3,7 +3,6 @@ from PyQt5 import QtCore, QtWidgets
 from LocWindow import LocWidget
 from DecayWindow import DecayWidget
 from GridWindow import GridWidget
-from GridWorker import GridWorker
 
 class ATEMViewMainWindow(QtWidgets.QMainWindow):
     """ Docstring """
@@ -14,27 +13,14 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
     LocWindow = None
     DecayWindow = None
     GridWindow = None
-    grids = {}
 
     def __init__(self, data):
         QtWidgets.QMainWindow.__init__(self)
 
         self.data = data
 
-        self.gridStore = {}
-        self.gridWorker_Obs = GridWorker(self.data, 'dBdt_Z')
-        self.gridWorker_Obs.finishedGrid.connect(self.storeGrid)
-        self.gridWorker_Obs.start()
-        self.gridWorker_Pred = GridWorker(self.data, 'dBdt_Z_pred')
-        self.gridWorker_Pred.finishedGrid.connect(self.storeGrid)
-        self.gridWorker_Pred.start()
-
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.initUI()
-
-        self.btnLoc.clicked.connect(self.buttonClicked)
-        self.btnDecay.clicked.connect(self.buttonClicked)
-        self.btnGrid.clicked.connect(self.buttonClicked)
 
         # Initialize the selection
         self.setSelectedLocInd(self.data.locs.iloc[0].name)
@@ -51,6 +37,9 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         self.btnLoc = QtWidgets.QPushButton("Loc")
         self.btnDecay = QtWidgets.QPushButton("Decay")
         self.btnGrid = QtWidgets.QPushButton("Grid")
+        self.btnLoc.clicked.connect(self.buttonClicked)
+        self.btnDecay.clicked.connect(self.buttonClicked)
+        self.btnGrid.clicked.connect(self.buttonClicked)
 
         hbox = QtWidgets.QHBoxLayout()
         hbox.addWidget(self.btnLoc)
@@ -62,12 +51,6 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.main_widget)
 
         self.statusBar().showMessage("", 2000)
-
-    @QtCore.pyqtSlot(dict)
-    def storeGrid(self, event):
-        if not event['ch'] in self.gridStore:
-            self.gridStore[event['ch']] = {}
-        self.gridStore[event['ch']][event['tInd']] = event
 
     def buttonClicked(self):
         """ Docstring """

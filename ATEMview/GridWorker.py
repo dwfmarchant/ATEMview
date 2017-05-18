@@ -28,7 +28,8 @@ class GridWorker(QtCore.QThread):
                   'tInd':tInd,
                   'x_vector':x_vector,
                   'y_vector':y_vector,
-                  'grid':grid}
+                  'grid':grid,
+                  'number_cells':self.grdOpts['number_cells']}
         return signal
 
     def run(self):
