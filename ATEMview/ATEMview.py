@@ -1,7 +1,6 @@
 
 import sys
 from PyQt5 import QtWidgets
-
 from MainWindow import ATEMViewMainWindow
 from DataLoadDialog import DataLoadDialog
 
@@ -13,7 +12,7 @@ def main(data=None):
         data = dataLoader.data
     else:
         data = data
-    ATEMViewMainWindow(data)
+    ATEM = ATEMViewMainWindow(data)
     app.exec_()
 
 if __name__ == '__main__':
