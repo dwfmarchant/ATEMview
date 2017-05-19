@@ -7,12 +7,12 @@ from GridWindow import GridWidget
 class ATEMViewMainWindow(QtWidgets.QMainWindow):
     """ Docstring """
 
-    selectedLocInd = -1
-    selectedTimeInd = -1
+    selectedLocInd = 0
+    selectedTimeInd = 0
 
-    LocWindow = None
-    DecayWindow = None
-    GridWindow = None
+    locWindow = None
+    decayWindow = None
+    gridWindow = None
 
     def __init__(self, data):
         QtWidgets.QMainWindow.__init__(self)
@@ -62,7 +62,11 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
             self.openGridWindow()
 
     def closeEvent(self, event):
-        for window in [self.LocWindow, self.DecayWindow, self.GridWindow]:
+        """
+        closeEvent for MainWindow
+        Closes all open windows.
+        """
+        for window in [self.locWindow, self.decayWindow, self.gridWindow]:
             if window is not None:
                 window.deleteLater()
                 window = None
@@ -70,32 +74,32 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
 
     def openLocWindow(self):
         """ docstring """
-        if self.LocWindow is None:
-            self.LocWindow = LocWidget(self)
-            self.LocWindow.setAll(self.data.locs.x.values,
+        if self.locWindow is None:
+            self.locWindow = LocWidget(self)
+            self.locWindow.setAll(self.data.locs.x.values,
                                   self.data.locs.y.values)
             self.setSelectedLocInd(self.selectedLocInd)
             self.setSelectedTimeInd(self.selectedTimeInd)
         else:
-            self.LocWindow.toggleVisible()
+            self.locWindow.toggleVisible()
 
     def openDecayWindow(self):
         """ docstring """
-        if self.DecayWindow is None:
-            self.DecayWindow = DecayWidget(self)
+        if self.decayWindow is None:
+            self.decayWindow = DecayWidget(self)
             self.setSelectedLocInd(self.selectedLocInd)
             self.setSelectedTimeInd(self.selectedTimeInd)
         else:
-            self.DecayWindow.toggleVisible()
+            self.decayWindow.toggleVisible()
 
     def openGridWindow(self):
         """ docstring """
-        if self.GridWindow is None:
-            self.GridWindow = GridWidget(self)
+        if self.gridWindow is None:
+            self.gridWindow = GridWidget(self)
             self.setSelectedLocInd(self.selectedLocInd)
             self.setSelectedTimeInd(self.selectedTimeInd)
         else:
-            self.GridWindow.toggleVisible()
+            self.gridWindow.toggleVisible()
 
     def setSelectedLocInd(self, locInd):
         """ docstring """
@@ -103,33 +107,35 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
             self.selectedLocInd = locInd
             selectedLoc = self.data.getLoc(locInd)
 
-            if self.LocWindow is not None:
-                self.LocWindow.setLocation(selectedLoc)
-            if self.DecayWindow is not None:
-                self.DecayWindow.setLocation(selectedLoc)
-            if self.GridWindow is not None:
-                self.GridWindow.setLocation(selectedLoc)
+            if self.locWindow is not None:
+                self.locWindow.setLocation(selectedLoc)
+            if self.decayWindow is not None:
+                self.decayWindow.setLocation(selectedLoc)
+            if self.gridWindow is not None:
+                self.gridWindow.setLocation(selectedLoc)
 
     def setSelectedTimeInd(self, timeInd):
         """ docstring """
-
         if timeInd in self.data.times.index:
             self.selectedTimeInd = timeInd
-            if self.GridWindow is not None:
-                self.GridWindow.setTime(self.data.getTime(timeInd))
-            if self.DecayWindow is not None:
-                self.DecayWindow.setTime(self.data.times.loc[timeInd])
+            if self.locWindow is not None:
+                self.locWindow.setTime(self.data.getTime(timeInd))
+            if self.gridWindow is not None:
+                self.gridWindow.setTime(self.data.getTime(timeInd))
+            if self.decayWindow is not None:
+                self.decayWindow.setTime(self.data.times.loc[timeInd])
 
     @QtCore.pyqtSlot(dict)
     def get_event(self, event):
         """ docstring """
-
         if event['name'] == 'closestLoc':
             closestLocInd = self.data.getClosestLocInd(event['x'], event['y'])
             self.setSelectedLocInd(closestLocInd)
         elif event['name'] == 'closestTime':
             closestTimeInd = self.data.getClosestTimeInd(event['t'])
             self.setSelectedTimeInd(closestTimeInd)
+        elif event['name'] == 'sameTime':
+            self.setSelectedTimeInd(self.selectedTimeInd)
         elif event['name'] == 'nextLocInd':
             self.setSelectedLocInd(self.selectedLocInd + 1)
         elif event['name'] == 'prevLocInd':

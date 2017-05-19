@@ -103,7 +103,7 @@ class GridWidget(ATEMWidget):
     def setClim(self):
         lsVal = self.lowSlider.value()
         hsVal = self.highSlider.value()
-        if lsVal>=hsVal:
+        if lsVal >= hsVal:
             self.lowSlider.setValue(hsVal-1)
             lsVal = self.lowSlider.value()
         dv = self.absMaxValue-self.absMinValue
@@ -117,10 +117,10 @@ class GridWidget(ATEMWidget):
         """ Docstring """
         x = loc.iloc[0].x
         y = loc.iloc[0].y
-        self.selCrossXobs.set_data(self.obsCanvas.axes.get_xlim(),[y,y])
-        self.selCrossYobs.set_data([x,x],self.obsCanvas.axes.get_ylim())
-        self.selCrossXpred.set_data(self.predCanvas.axes.get_xlim(),[y,y])
-        self.selCrossYpred.set_data([x,x],self.predCanvas.axes.get_ylim())
+        self.selCrossXobs.set_data(self.obsCanvas.axes.get_xlim(), [y, y])
+        self.selCrossYobs.set_data([x, x], self.obsCanvas.axes.get_ylim())
+        self.selCrossXpred.set_data(self.predCanvas.axes.get_xlim(), [y, y])
+        self.selCrossYpred.set_data([x, x], self.predCanvas.axes.get_ylim())
         self.draw()
 
     def setTime(self, data_times):
@@ -152,4 +152,3 @@ class GridWidget(ATEMWidget):
 
         self.setClim()
         self.draw()
-
