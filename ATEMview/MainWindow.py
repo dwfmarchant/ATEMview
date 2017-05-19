@@ -125,8 +125,11 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         """ docstring """
 
         if event['name'] == 'closestLoc':
-            closestLoc = self.data.getClosestLocInd(event['x'], event['y'])
-            self.setSelectedLocInd(closestLoc)
+            closestLocInd = self.data.getClosestLocInd(event['x'], event['y'])
+            self.setSelectedLocInd(closestLocInd)
+        elif event['name'] == 'closestTime':
+            closestTimeInd = self.data.getClosestTimeInd(event['t'])
+            self.setSelectedTimeInd(closestTimeInd)
         elif event['name'] == 'nextLocInd':
             self.setSelectedLocInd(self.selectedLocInd + 1)
         elif event['name'] == 'prevLocInd':
