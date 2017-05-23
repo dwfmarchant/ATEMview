@@ -78,10 +78,11 @@ class GridWidget(ATEMWidget):
         self.gridWorker_Obs.finishedGrid.connect(self.storeGrid)
         self.gridWorker_Obs.start()
 
-        self.gridWorker_Pred = GridWorker(self.parent.data, 'dBdt_Z_pred')
-        self.gridWorker_Pred.grdOpts['number_cells'] = 256
-        self.gridWorker_Pred.finishedGrid.connect(self.storeGrid)
-        self.gridWorker_Pred.start()
+        if self.parent.data.has_pred:
+            self.gridWorker_Pred = GridWorker(self.parent.data, 'dBdt_Z_pred')
+            self.gridWorker_Pred.grdOpts['number_cells'] = 256
+            self.gridWorker_Pred.finishedGrid.connect(self.storeGrid)
+            self.gridWorker_Pred.start()
 
     @QtCore.pyqtSlot(dict)
     def storeGrid(self, event):
