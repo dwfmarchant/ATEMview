@@ -1,6 +1,6 @@
 
 from PyQt5 import QtCore
-from Utils import make_time_channel_grid, mask_time_channel_grid
+from .Utils import make_time_channel_grid, mask_time_channel_grid
 
 class GridWorker(QtCore.QThread):
 

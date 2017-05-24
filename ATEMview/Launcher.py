@@ -3,10 +3,10 @@ ATEMview launcher
 """
 import sys
 from PyQt5 import QtWidgets
-from MainWindow import ATEMViewMainWindow
-from DataLoadDialog import DataLoadDialog
+from ATEMview.MainWindow import ATEMViewMainWindow
+from ATEMview.DataLoadDialog import DataLoadDialog
 
-def main(data=None):
+def startATEMview(data=None):
     """
     ATEMview launcher
     """
@@ -22,4 +22,4 @@ def main(data=None):
     app.exec_()
 
 if __name__ == '__main__':
-    main()
+    startATEMview()

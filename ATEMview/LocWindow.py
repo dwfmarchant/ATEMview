@@ -1,8 +1,8 @@
 """ ATEMview Location Window """
 from PyQt5 import QtCore, QtWidgets
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from Canvas import Canvas
-from ATEMWidget import ATEMWidget
+from .Canvas import Canvas
+from .ATEMWidget import ATEMWidget
 
 class LocWidget(ATEMWidget):
     """docstring for LocWidget"""

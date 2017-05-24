@@ -2,9 +2,9 @@
 from PyQt5 import QtCore, QtWidgets
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import numpy as np
-from ATEMWidget import ATEMWidget
-from Canvas import Canvas
-from GridWorker import GridWorker
+from .ATEMWidget import ATEMWidget
+from .Canvas import Canvas
+from .GridWorker import GridWorker
 
 class GridWidget(ATEMWidget):
     """docstring for GridWidget"""

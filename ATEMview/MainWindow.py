@@ -1,8 +1,8 @@
 
 from PyQt5 import QtCore, QtWidgets
-from LocWindow import LocWidget
-from DecayWindow import DecayWidget
-from GridWindow import GridWidget
+from .LocWindow import LocWidget
+from .DecayWindow import DecayWidget
+from .GridWindow import GridWidget
 
 class ATEMViewMainWindow(QtWidgets.QMainWindow):
     """ Docstring """
