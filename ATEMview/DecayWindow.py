@@ -25,15 +25,12 @@ class DecayWidget(ATEMWidget):
         self.setPalette(palette)
 
         self.titleLabel = QtWidgets.QLabel()
-        self.titleLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.titleLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 
+        self.locLabel = QtWidgets.QLabel('1234')
+        self.locLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
-        self.win = pg.GraphicsWindow()
-        # self.win = pg.GraphicsWidget()
-        self.chLabel = pg.LabelItem(justify='right')
-        self.win.addItem(self.chLabel)
-
-        self.plotWidget = self.win.addPlot(row=1, col=0)
+        self.plotWidget = pg.PlotWidget()
         self.plotWidget.setLogMode(x=True, y=True)
         self.plotWidget.setLabel('left', 'dB/dt')
         self.plotWidget.setLabel('bottom', 'Time', units='s')
@@ -88,7 +85,8 @@ class DecayWidget(ATEMWidget):
 
         l = QtWidgets.QVBoxLayout(self)
         l.addWidget(self.titleLabel)
-        l.addWidget(self.win)
+        l.addWidget(self.plotWidget)
+        l.addWidget(self.locLabel)
 
         self.mouseMoveProxy = pg.SignalProxy(self.plotWidget.scene().sigMouseMoved,
                                              rateLimit=30,
@@ -100,7 +98,7 @@ class DecayWidget(ATEMWidget):
         if self.plotWidget.sceneBoundingRect().contains(pos):
             mousePoint = self.plotWidget.getViewBox().mapSceneToView(pos)
             string = "<span style='font-size: 12pt'>x={:.2e}, t={:.2e}</span>"
-            self.chLabel.setText(string.format(10**mousePoint.x(), 10**mousePoint.y()))
+            self.locLabel.setText(string.format(10**mousePoint.x(), 10**mousePoint.y()))
             self.chvLine.setPos(mousePoint.x())
             self.chhLine.setPos(mousePoint.y())
 
