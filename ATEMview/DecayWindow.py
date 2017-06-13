@@ -105,9 +105,11 @@ class DecayWidget(ATEMWidget):
     def clickEvent(self, event):
         if self.plotWidget.sceneBoundingRect().contains(event.scenePos()):
             mousePoint = self.plotWidget.getViewBox().mapSceneToView(event.scenePos())
-        signal = {'name':'closestTime',
-                  't':10**mousePoint.x()}
-        self.ChangeSelectionSignal.emit(signal)
+            signal = {'name':'closestTime',
+                      't':10**mousePoint.x()}
+            self.ChangeSelectionSignal.emit(signal)
+        else:
+            pass
 
     def setLocation(self, loc):
         """ Docstring """
