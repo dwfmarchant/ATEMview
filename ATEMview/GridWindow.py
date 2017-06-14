@@ -66,6 +66,9 @@ class GridWidget(ATEMWidget):
         self.colorbar.setImage(jetCM[cbData])
         self.colorbarWidget.addItem(self.colorbar)
 
+        self.locLabel = QtWidgets.QLabel('')
+        self.locLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+
         self.obsImage = pg.ImageItem()
         self.obsPlotWidget.addItem(self.obsImage)
 
@@ -111,6 +114,12 @@ class GridWidget(ATEMWidget):
         l.addLayout(lh)
         l.addWidget(self.highSlider)
         l.addWidget(self.lowSlider)
+        l.addWidget(self.locLabel)
+
+        self.mouseMoveProxyObs = pg.SignalProxy(self.obsPlotWidget.scene().sigMouseMoved,
+                                                rateLimit=30, slot=self.mouseMovedEvent)
+        self.mouseMoveProxyPred = pg.SignalProxy(self.predPlotWidget.scene().sigMouseMoved,
+                                                 rateLimit=30, slot=self.mouseMovedEvent)
 
     def init_grids(self):
 
@@ -167,6 +176,20 @@ class GridWidget(ATEMWidget):
             self.ChangeSelectionSignal.emit(signal)
         else:
             pass
+
+    def mouseMovedEvent(self, pos):
+        pos = pos[0]
+        if self.obsPlotWidget.sceneBoundingRect().contains(pos):
+            mousePoint = self.obsPlotWidget.getViewBox().mapSceneToView(pos)
+            string = "<span style='font-size: 12pt'>x={:.0f}, y={:.0f}</span>"
+            self.locLabel.setText(string.format(mousePoint.x(), mousePoint.y()))
+        elif self.predPlotWidget.sceneBoundingRect().contains(pos):
+            mousePoint = self.predPlotWidget.getViewBox().mapSceneToView(pos)
+            string = "<span style='font-size: 12pt'>x={:.0f}, y={:.0f}</span>"
+            self.locLabel.setText(string.format(mousePoint.x(), mousePoint.y()))
+
+            # self.chvLine.setPos(mousePoint.x())
+            # self.chhLine.setPos(mousePoint.y())
 
     def setClim(self):
         lsVal = self.lowSlider.value()
