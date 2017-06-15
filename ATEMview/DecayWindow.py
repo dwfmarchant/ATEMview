@@ -113,17 +113,21 @@ class DecayWidget(ATEMWidget):
 
     def setLocation(self, loc):
         """ Docstring """
+
         t = loc.t.values
         obs = loc.dBdt_Z.values
-        pred = loc.dBdt_Z_pred.values
-        lower = obs - loc.dBdt_Z_uncert.values
-        upper = obs + loc.dBdt_Z_uncert.values
-        lower[lower < 0.] = obs.min()/10.
-
         self.obsPlot.setData(t, obs)
-        self.predPlot.setData(t, pred)
-        self.upperPlot.setData(t, lower)
-        self.lowerPlot.setData(t, upper)
+
+        if loc.dBdt_Z_pred.any():
+            pred = loc.dBdt_Z_pred.values
+            self.predPlot.setData(t, pred)
+
+        if loc.dBdt_Z_uncert.any():
+            lower = obs - loc.dBdt_Z_uncert.values
+            upper = obs + loc.dBdt_Z_uncert.values
+            lower[lower < 0.] = obs.min()/100.
+            self.upperPlot.setData(t, lower)
+            self.lowerPlot.setData(t, upper)
 
         self.plotWidget.setXRange(np.log10(t.min()), np.log10(t.max()))
         self.plotWidget.setYRange(np.log10(obs.min()), np.log10(obs.max()))

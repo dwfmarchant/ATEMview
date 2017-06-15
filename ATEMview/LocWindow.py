@@ -113,27 +113,26 @@ class LocWidget(ATEMWidget):
     @QtCore.pyqtSlot(bool)
     def toggleMisfit(self, show):
         """ Callback that gets fired 'Show Misfit' box is toggled """
-        if show:
-            self.colorbarWidget.setVisible(True)
-            self.maxCvalSlider.setVisible(True)
-            self.showData = True
-        else:
-            self.colorbarWidget.setVisible(False)
-            self.maxCvalSlider.setVisible(False)
-            self.showData = False
-        self.updatePlot()
+        if self.data is not None:
+            if show:
+                self.colorbarWidget.setVisible(True)
+                self.maxCvalSlider.setVisible(True)
+                self.showData = True
+            else:
+                self.colorbarWidget.setVisible(False)
+                self.maxCvalSlider.setVisible(False)
+                self.showData = False
+            self.updatePlot()
 
     def updatePlot(self):
-        if self.showData:
+        if self.showData & (self.data is not None):
             hsVal = self.maxCvalSlider.value()
             maxVal = self.maxVal*hsVal/100.
             self.cbMaxLabel.setText('{:.2f}'.format(maxVal))
             bins = np.linspace(0., maxVal, 255)
             di = np.digitize(self.data, bins)-1
-            self.scatter.setData(self.x, self.y,
-                                 pen=None,
-                                 brush=jetBrush[di],
-                                 symbolSize=10.)
+            self.scatter.setData(self.x, self.y, pen=None,
+                                 brush=jetBrush[di], symbolSize=10.)
         else:
             self.scatter.setData(self.x, self.y, pen=None, brush='k', symbolSize=10.)
 
@@ -154,9 +153,12 @@ class LocWidget(ATEMWidget):
         """ Set the displayed misfit data """
         self.x = data_times.x.values
         self.y = data_times.y.values
-        self.data = (data_times.dBdt_Z-data_times.dBdt_Z_pred).abs()/data_times.dBdt_Z_uncert
-        self.minVal = self.data.min()
-        self.maxVal = self.data.max()
+        if data_times.dBdt_Z_pred.any():
+            self.data = (data_times.dBdt_Z-data_times.dBdt_Z_pred).abs()/data_times.dBdt_Z_uncert
+            self.minVal = self.data.min()
+            self.maxVal = self.data.max()
+        else:
+            self.data = None
         self.updatePlot()
 
     def setClim(self):
