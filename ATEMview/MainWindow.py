@@ -55,11 +55,11 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
     def buttonClicked(self):
         """ Docstring """
         if self.sender() is self.btnLoc:
-            self.openLocWindow()
+            self.openWindow('Loc')
         elif self.sender() is self.btnDecay:
-            self.openDecayWindow()
+            self.openWindow('Decay')
         elif self.sender() is self.btnGrid:
-            self.openGridWindow()
+            self.openWindow('Grid')
 
     def closeEvent(self, event):
         """
@@ -72,34 +72,30 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
                 window = None
         event.accept()
 
-    def openLocWindow(self):
-        """ docstring """
-        if self.locWindow is None:
-            self.locWindow = LocWidget(self)
-            self.locWindow.setAll(self.data.locs.x.values,
-                                  self.data.locs.y.values)
-            self.setSelectedLocInd(self.selectedLocInd)
-            self.setSelectedTimeInd(self.selectedTimeInd)
+    def openWindow(self, windowType):
+        if windowType is 'Loc':
+            if self.locWindow is None:
+                self.locWindow = LocWidget(self)
+                self.locWindow.setAll(self.data.locs.x.values,
+                                      self.data.locs.y.values)
+            else:
+                self.locWindow.toggleVisible()
+        elif windowType is 'Decay':
+            if self.decayWindow is None:
+                self.decayWindow = DecayWidget(self)
+            else:
+                self.decayWindow.toggleVisible()
+        elif windowType is 'Grid':
+            if self.gridWindow is None:
+                self.gridWindow = GridWidget(self)
+            else:
+                self.gridWindow.toggleVisible()
         else:
-            self.locWindow.toggleVisible()
+            print('Unknown windowType: {}'.format(windowType))
 
-    def openDecayWindow(self):
-        """ docstring """
-        if self.decayWindow is None:
-            self.decayWindow = DecayWidget(self)
-            self.setSelectedLocInd(self.selectedLocInd)
-            self.setSelectedTimeInd(self.selectedTimeInd)
-        else:
-            self.decayWindow.toggleVisible()
+        self.setSelectedLocInd(self.selectedLocInd)
+        self.setSelectedTimeInd(self.selectedTimeInd)
 
-    def openGridWindow(self):
-        """ docstring """
-        if self.gridWindow is None:
-            self.gridWindow = GridWidget(self)
-            self.setSelectedLocInd(self.selectedLocInd)
-            self.setSelectedTimeInd(self.selectedTimeInd)
-        else:
-            self.gridWindow.toggleVisible()
 
     def setSelectedLocInd(self, locInd):
         """ docstring """
