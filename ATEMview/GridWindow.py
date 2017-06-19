@@ -15,6 +15,8 @@ class GridWidget(ATEMWidget):
         self.gridStore = {}
         self.init_grids()
         self.init_ui()
+        if not self.parent.data.has_pred:
+            self.predPlotWidget.setVisible(False)
 
         self.current_tInd = self.parent.selectedTimeInd
         self.absMinValue = 1e-20
