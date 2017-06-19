@@ -198,7 +198,8 @@ class GridWidget(ATEMWidget):
             self.lowSlider.setValue(hsVal-1)
             lsVal = self.lowSlider.value()
         self.drawObs()
-        self.drawPred()
+        if 'dBdt_Z_pred' in self.gridStore:
+            self.drawPred()
 
     def getClim(self):
         lsVal = self.lowSlider.value()
@@ -247,6 +248,7 @@ class GridWidget(ATEMWidget):
         grid_pred = self.gridStore['dBdt_Z_pred'][self.current_tInd]['grid'].T
         x_vector = self.gridStore['dBdt_Z_pred'][self.current_tInd]['x_vector']
         y_vector = self.gridStore['dBdt_Z_pred'][self.current_tInd]['y_vector']
+
         if np.any(grid_pred):
             clMin, clMax = self.getClim()
             bins = np.linspace(clMin, clMax, 255)
