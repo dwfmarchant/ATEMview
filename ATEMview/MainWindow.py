@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtWidgets
 from .LocWindow import LocWidget
 from .DecayWindow import DecayWidget
 from .GridWindow import GridWidget
+from .LineWindow import LineWidget
 
 class ATEMViewMainWindow(QtWidgets.QMainWindow):
     """ Docstring """
@@ -13,6 +14,7 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
     locWindow = None
     decayWindow = None
     gridWindow = None
+    lineWindow = None
 
     def __init__(self, data):
         QtWidgets.QMainWindow.__init__(self)
@@ -37,14 +39,18 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         self.btnLoc = QtWidgets.QPushButton("Loc")
         self.btnDecay = QtWidgets.QPushButton("Decay")
         self.btnGrid = QtWidgets.QPushButton("Grid")
+        self.btnLine = QtWidgets.QPushButton("Line")
+
         self.btnLoc.clicked.connect(self.buttonClicked)
         self.btnDecay.clicked.connect(self.buttonClicked)
         self.btnGrid.clicked.connect(self.buttonClicked)
+        self.btnLine.clicked.connect(self.buttonClicked)
 
         hbox = QtWidgets.QHBoxLayout()
         hbox.addWidget(self.btnLoc)
         hbox.addWidget(self.btnDecay)
         hbox.addWidget(self.btnGrid)
+        hbox.addWidget(self.btnLine)
         self.main_widget.setLayout(hbox)
 
         self.main_widget.setFocus()
@@ -60,6 +66,8 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
             self.openWindow('Decay')
         elif self.sender() is self.btnGrid:
             self.openWindow('Grid')
+        elif self.sender() is self.btnLine:
+            self.openWindow('Line')
 
     def closeEvent(self, event):
         """
@@ -90,6 +98,11 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
                 self.gridWindow = GridWidget(self)
             else:
                 self.gridWindow.toggleVisible()
+        elif windowType is 'Line':
+            if self.lineWindow is None:
+                self.lineWindow = LineWidget(self)
+            else:
+                self.lineWindow.toggleVisible()
         else:
             print('Unknown windowType: {}'.format(windowType))
 
@@ -116,7 +129,7 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
     @property
     def windows(self):
         """ Return a list of accosiated windows """
-        return [self.locWindow, self.decayWindow, self.gridWindow]
+        return [self.locWindow, self.decayWindow, self.gridWindow, self.lineWindow]
 
     @QtCore.pyqtSlot(dict)
     def get_event(self, event):
