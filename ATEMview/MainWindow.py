@@ -96,30 +96,27 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         self.setSelectedLocInd(self.selectedLocInd)
         self.setSelectedTimeInd(self.selectedTimeInd)
 
-
     def setSelectedLocInd(self, locInd):
         """ docstring """
         if locInd in self.data.locs.index:
             self.selectedLocInd = locInd
             selectedLoc = self.data.getLoc(locInd)
-
-            if self.locWindow is not None:
-                self.locWindow.setLocation(selectedLoc)
-            if self.decayWindow is not None:
-                self.decayWindow.setLocation(selectedLoc)
-            if self.gridWindow is not None:
-                self.gridWindow.setLocation(selectedLoc)
+            for window in self.windows:
+                if window is not None:
+                    window.setLocation(selectedLoc)
 
     def setSelectedTimeInd(self, timeInd):
         """ docstring """
         if timeInd in self.data.times.index:
             self.selectedTimeInd = timeInd
-            if self.locWindow is not None:
-                self.locWindow.setTime(self.data.getTime(timeInd))
-            if self.gridWindow is not None:
-                self.gridWindow.setTime(self.data.getTime(timeInd))
-            if self.decayWindow is not None:
-                self.decayWindow.setTime(self.data.times.loc[timeInd])
+            for window in self.windows:
+                if window is not None:
+                    window.setTime(self.data.getTime(timeInd))
+
+    @property
+    def windows(self):
+        """ Return a list of accosiated windows """
+        return [self.locWindow, self.decayWindow, self.gridWindow]
 
     @QtCore.pyqtSlot(dict)
     def get_event(self, event):

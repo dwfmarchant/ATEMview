@@ -136,4 +136,5 @@ class DecayWidget(ATEMWidget):
 
     def setTime(self, time):
         """ docstring """
-        self.selectedTimeLine.setPos(np.log10(time.values))
+        t = time.iloc[0].t
+        self.selectedTimeLine.setPos(np.log10(t))
