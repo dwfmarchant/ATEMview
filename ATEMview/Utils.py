@@ -23,5 +23,10 @@ def mask_time_channel_grid(data_time, grid, x_vector, y_vector, mask_radius=100.
     if mask is None:
         mask = ~maskGrid(data_time.x.values, data_time.y.values,
                          x_vector, y_vector, mask_radius)
+    elif mask.shape != grid.shape:
+        print("Warning: Mask and grid differnt shapes")
+        mask = ~maskGrid(data_time.x.values, data_time.y.values,
+                         x_vector, y_vector, mask_radius)
+                         
     grid[mask] = np.nan
     return grid, mask
