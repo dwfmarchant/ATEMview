@@ -14,10 +14,12 @@ class LocWidget(ATEMWidget):
         self.init_ui()
         self.showData = False
         self.data = None
+        self.tInd = -1
         self.x = None
         self.y = None
         self.minVal = 1.
         self.maxVal = 1.
+        self.cbFormatStr = '{:.2f}'
         self.show()
 
     def init_ui(self):
@@ -78,11 +80,28 @@ class LocWidget(ATEMWidget):
         self.misfitCheckBox = QtWidgets.QCheckBox('Show Misfit')
         self.misfitCheckBox.toggled.connect(self.toggleMisfit)
 
+        self.selectCombo = QtWidgets.QComboBox()
+        self.selectCombo.addItem("Misfit (time)")
+        self.selectCombo.addItem("Observed")
+        self.selectCombo.addItem("Predicted")
+        self.selectCombo.activated[str].connect(self.changeCombo)
+        self.selectCombo.setVisible(False)
+
+        self.titleLabel = QtWidgets.QLabel(self.selectCombo.currentText())
+        self.titleLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+        self.titleLabel.setVisible(False)
+
         self.maxCvalSlider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.maxCvalSlider.setMaximum(100)
         self.maxCvalSlider.setValue(100)
         self.maxCvalSlider.valueChanged.connect(self.setClim)
         self.maxCvalSlider.setVisible(False)
+
+        self.minCvalSlider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.minCvalSlider.setMaximum(100)
+        self.minCvalSlider.setValue(0)
+        self.minCvalSlider.valueChanged.connect(self.updatePlot)
+        self.minCvalSlider.setVisible(False)
 
         cbvLayout = QtWidgets.QVBoxLayout()
         cbvLayout.addWidget(self.cbMaxLabel)
@@ -94,11 +113,17 @@ class LocWidget(ATEMWidget):
         hLayout.addLayout(cbvLayout)
 
         vLayout = QtWidgets.QVBoxLayout(self)
-        vLayout.addWidget(self.misfitCheckBox)
+
+        hMisLayout = QtWidgets.QHBoxLayout()
+        hMisLayout.addWidget(self.misfitCheckBox)
+        hMisLayout.addWidget(self.selectCombo)
+
+        vLayout.addLayout(hMisLayout)
+        vLayout.addWidget(self.titleLabel)
         vLayout.addLayout(hLayout)
 
         vLayout.addWidget(self.maxCvalSlider)
-
+        vLayout.addWidget(self.minCvalSlider)
 
     def clickEvent(self, event):
         if self.plotWidget.sceneBoundingRect().contains(event.scenePos()):
@@ -117,19 +142,36 @@ class LocWidget(ATEMWidget):
             if show:
                 self.colorbarWidget.setVisible(True)
                 self.maxCvalSlider.setVisible(True)
+                self.minCvalSlider.setVisible(True)
+                self.selectCombo.setVisible(True)
+                self.titleLabel.setVisible(True)
                 self.showData = True
             else:
                 self.colorbarWidget.setVisible(False)
                 self.maxCvalSlider.setVisible(False)
-                self.showData = False
+                self.minCvalSlider.setVisible(False)
+                self.selectCombo.setVisible(False)
+                self.titleLabel.setVisible(False)
             self.updatePlot()
+
+    @QtCore.pyqtSlot(str)
+    def changeCombo(self, text):
+        if self.selectCombo.currentText() == "Misfit (time)":
+            self.cbFormatStr = "{:.2f}"
+        elif self.selectCombo.currentText() == "Observed":
+            self.cbFormatStr = "{:.2e}"
+        elif self.selectCombo.currentText() == "Predicted":
+            self.cbFormatStr = "{:.2e}"
+        self.titleLabel.setText(text)
+        self.setData()
+        self.updatePlot()
 
     def updatePlot(self):
         if self.showData & (self.data is not None):
-            hsVal = self.maxCvalSlider.value()
-            maxVal = self.maxVal*hsVal/100.
-            self.cbMaxLabel.setText('{:.2f}'.format(maxVal))
-            bins = np.linspace(0., maxVal, 255)
+            clMin, clMax = self.getClim()
+            self.cbMaxLabel.setText(self.cbFormatStr.format(clMax))
+            self.cbMinLabel.setText(self.cbFormatStr.format(clMin))
+            bins = np.linspace(clMin, clMax, 255)
             di = np.digitize(self.data, bins)-1
             self.scatter.setData(self.x, self.y, pen=None,
                                  brush=jetBrush[di], symbolSize=10.)
@@ -151,16 +193,42 @@ class LocWidget(ATEMWidget):
 
     def setTime(self, data_times):
         """ Set the displayed misfit data """
-        self.x = data_times.x.values
-        self.y = data_times.y.values
-        if data_times.dBdt_Z_pred.any():
-            self.data = (data_times.dBdt_Z-data_times.dBdt_Z_pred).abs()/data_times.dBdt_Z_uncert
-            self.minVal = self.data.min()
-            self.maxVal = self.data.max()
+        self.tInd = data_times.tInd.iloc[0]
+        self.setData()
+        self.updatePlot()
+
+    def setData(self):
+        data_time = self.parent.data.getTime(self.tInd)
+        self.x = data_time.x.values
+        self.y = data_time.y.values
+        if self.selectCombo.currentText() == "Misfit (time)":
+            if data_time.dBdt_Z_pred.any():
+                self.data = (data_time.dBdt_Z-data_time.dBdt_Z_pred).abs()/data_time.dBdt_Z_uncert
+            else:
+                self.data = None
+        elif self.selectCombo.currentText() == "Observed":
+            self.data = data_time.dBdt_Z
+        elif self.selectCombo.currentText() == "Predicted":
+            self.data = data_time.dBdt_Z_pred
         else:
             self.data = None
-        self.updatePlot()
+        if self.data is not None:
+            self.minVal = self.data.min()
+            self.maxVal = self.data.max()
 
     def setClim(self):
         """ Set the color limits on the misfit scatter plot """
+        lsVal = self.minCvalSlider.value()
+        hsVal = self.maxCvalSlider.value()
+        if lsVal >= hsVal:
+            self.minCvalSlider.setValue(hsVal-1)
+            lsVal = self.minCvalSlider.value()
         self.updatePlot()
+
+    def getClim(self):
+        lsVal = self.minCvalSlider.value()
+        hsVal = self.maxCvalSlider.value()
+        dv = self.data.max()-self.data.min()
+        clMin = self.data.min()+dv*lsVal/100.
+        clMax = self.data.min()+dv*hsVal/100.
+        return clMin, clMax
