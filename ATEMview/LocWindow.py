@@ -82,6 +82,7 @@ class LocWidget(ATEMWidget):
 
         self.selectCombo = QtWidgets.QComboBox()
         self.selectCombo.addItem("Misfit (time)")
+        self.selectCombo.addItem("Misfit (total)")
         self.selectCombo.addItem("Observed")
         self.selectCombo.addItem("Predicted")
         self.selectCombo.activated[str].connect(self.changeCombo)
@@ -158,6 +159,8 @@ class LocWidget(ATEMWidget):
     def changeCombo(self, text):
         if self.selectCombo.currentText() == "Misfit (time)":
             self.cbFormatStr = "{:.2f}"
+        elif self.selectCombo.currentText() == "Misfit (total)":
+            self.cbFormatStr = "{:.2f}"
         elif self.selectCombo.currentText() == "Observed":
             self.cbFormatStr = "{:.2e}"
         elif self.selectCombo.currentText() == "Predicted":
@@ -194,7 +197,8 @@ class LocWidget(ATEMWidget):
     def setTime(self, data_times):
         """ Set the displayed misfit data """
         self.tInd = data_times.tInd.iloc[0]
-        self.setData()
+        if self.selectCombo.currentText() != "Misfit (total)":
+            self.setData()
         self.updatePlot()
 
     def setData(self):
@@ -204,6 +208,17 @@ class LocWidget(ATEMWidget):
         if self.selectCombo.currentText() == "Misfit (time)":
             if data_time.dBdt_Z_pred.any():
                 self.data = (data_time.dBdt_Z-data_time.dBdt_Z_pred).abs()/data_time.dBdt_Z_uncert
+            else:
+                self.data = None
+        elif self.selectCombo.currentText() == "Misfit (total)":
+            if data_time.dBdt_Z_pred.any():
+                grp = self.parent.data.df.groupby('locInd')
+                l22 = lambda g: np.linalg.norm((g.dBdt_Z - g.dBdt_Z_pred)/g.dBdt_Z_uncert)**2/g.shape[0]
+                grp = grp.agg(l22)[['x', 'y', 'dBdt_Z']]
+                self.data = grp.dBdt_Z.values
+                self.x = self.parent.data.locs.sort_index().x.values
+                self.y = self.parent.data.locs.sort_index().y.values
+                print(self.data)
             else:
                 self.data = None
         elif self.selectCombo.currentText() == "Observed":
