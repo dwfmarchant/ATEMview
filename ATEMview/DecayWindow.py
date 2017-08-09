@@ -44,10 +44,16 @@ class DecayWidget(ATEMWidget):
                                             'width': 2},
                                        name='Obs.')
 
+        self.obsNegPlot = pg.PlotDataItem(symbol='o',
+                                          symbolSize=5,
+                                          symbolBrush='r',
+                                          pen=None,
+                                          name=None)
+
         self.predPlot = pg.PlotDataItem(symbol='o',
                                         symbolSize=5,
-                                        symbolBrush='r',
-                                        pen={'color': 'r',
+                                        symbolBrush='b',
+                                        pen={'color': 'b',
                                              'width': 2},
                                         name='Pred.')
 
@@ -69,6 +75,7 @@ class DecayWidget(ATEMWidget):
         self.plotWidget.addItem(self.chvLine, ignoreBounds=True)
         self.plotWidget.addItem(self.chhLine, ignoreBounds=True)
         self.plotWidget.addItem(self.obsPlot)
+        self.plotWidget.addItem(self.obsNegPlot)
         self.plotWidget.addItem(self.predPlot)
         self.plotWidget.addItem(self.selectedTimeLine, ignoreBounds=True)
         self.plotWidget.addItem(uncertBounds, ignoreBounds=True)
@@ -77,10 +84,11 @@ class DecayWidget(ATEMWidget):
 
         uncertBounds.setZValue(0)
         self.selectedTimeLine.setZValue(1)
+        self.obsNegPlot.setZValue(3)
         self.obsPlot.setZValue(2)
-        self.predPlot.setZValue(3)
-        self.chvLine.setZValue(4)
-        self.chhLine.setZValue(5)
+        self.predPlot.setZValue(4)
+        self.chvLine.setZValue(5)
+        self.chhLine.setZValue(6)
         legend.setZValue(6)
 
         l = QtWidgets.QVBoxLayout(self)
@@ -116,7 +124,9 @@ class DecayWidget(ATEMWidget):
 
         t = loc.t.values
         obs = loc.dBdt_Z.values
-        self.obsPlot.setData(t, obs)
+        nInd = obs < 0.
+        self.obsPlot.setData(t, np.abs(obs))
+        self.obsNegPlot.setData(t[nInd], np.abs(obs[nInd]))
 
         if loc.dBdt_Z_pred.any():
             pred = loc.dBdt_Z_pred.values
@@ -130,7 +140,7 @@ class DecayWidget(ATEMWidget):
             self.lowerPlot.setData(t, upper)
 
         self.plotWidget.setXRange(np.log10(t.min()), np.log10(t.max()))
-        self.plotWidget.setYRange(np.log10(obs.min()), np.log10(obs.max()))
+        self.plotWidget.setYRange(np.log10(np.abs(obs).min()), np.log10(np.abs(obs).max()))
 
         self.titleLabel.setText('{}'.format(loc.locInd.iloc[0]))
 
