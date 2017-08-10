@@ -13,6 +13,13 @@ class DecayWidget(ATEMWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
+
+        self.lockYRange = False
+        self.plotYmin = 1.
+        self.plotYmax = 2.
+        self.dataYmin = 1.
+        self.dataYmax = 2.
+
         self.init_ui()
         self.show()
 
@@ -27,8 +34,11 @@ class DecayWidget(ATEMWidget):
         self.titleLabel = QtWidgets.QLabel()
         self.titleLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 
-        self.locLabel = QtWidgets.QLabel('1234')
+        self.locLabel = QtWidgets.QLabel('')
         self.locLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+
+        self.optLabel = QtWidgets.QLabel('')
+        self.optLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
         self.plotWidget = pg.PlotWidget()
         self.plotWidget.setLogMode(x=True, y=True)
@@ -94,19 +104,48 @@ class DecayWidget(ATEMWidget):
         l = QtWidgets.QVBoxLayout(self)
         l.addWidget(self.titleLabel)
         l.addWidget(self.plotWidget)
-        l.addWidget(self.locLabel)
+        labelBox = QtWidgets.QHBoxLayout()
+        labelBox.addWidget(self.optLabel)
+        labelBox.addWidget(self.locLabel)
+        l.addLayout(labelBox)
 
         self.mouseMoveProxy = pg.SignalProxy(self.plotWidget.scene().sigMouseMoved,
                                              rateLimit=30,
                                              slot=self.mouseMovedEvent)
         self.plotWidget.scene().sigMouseClicked.connect(self.clickEvent)
 
+    def keyPressEvent(self, event):
+        """ Docstring """
+        key = event.key()
+        if key == QtCore.Qt.Key_Right:
+            signal = {'name':'nextLocInd'}
+        elif key == QtCore.Qt.Key_Left:
+            signal = {'name':'prevLocInd'}
+        elif key == QtCore.Qt.Key_Up:
+            signal = {'name':'nextTimeInd'}
+        elif key == QtCore.Qt.Key_Down:
+            signal = {'name':'prevTimeInd'}
+        elif key == QtCore.Qt.Key_L:
+            if self.lockYRange:
+                self.lockYRange = False
+            else:
+                self.lockYRange = True
+            self.updateOptLabel()
+            self.updateYRange()
+            return
+        elif key == QtCore.Qt.Key_R:
+            self.updateYRange(rescale=True)
+            return
+        else:
+            return
+        self.ChangeSelectionSignal.emit(signal)
+
     def mouseMovedEvent(self, pos):
         pos = pos[0]
         if self.plotWidget.sceneBoundingRect().contains(pos):
             mousePoint = self.plotWidget.getViewBox().mapSceneToView(pos)
-            string = "<span style='font-size: 12pt'>x={:.2e}, t={:.2e}</span>"
-            self.locLabel.setText(string.format(10**mousePoint.x(), 10**mousePoint.y()))
+            string = "<span style='font-size: 12pt'>t={:.2e}</span>"
+            self.locLabel.setText(string.format(10**mousePoint.x()))
             self.chvLine.setPos(mousePoint.x())
             self.chhLine.setPos(mousePoint.y())
 
@@ -140,11 +179,33 @@ class DecayWidget(ATEMWidget):
             self.lowerPlot.setData(t, upper)
 
         self.plotWidget.setXRange(np.log10(t.min()), np.log10(t.max()))
-        self.plotWidget.setYRange(np.log10(np.abs(obs).min()), np.log10(np.abs(obs).max()))
+        self.updateYRange(yMin=np.log10(np.abs(obs).min()),
+                          yMax=np.log10(np.abs(obs).max()))
 
         self.titleLabel.setText('{}'.format(loc.locInd.iloc[0]))
+
+    def updateYRange(self, yMin=None, yMax=None, rescale=False):
+        if yMin is not None:
+            self.dataYmin = yMin
+        if yMax is not None:
+            self.dataYmax = yMax
+        if not self.lockYRange:
+            self.plotYmin = self.dataYmin
+            self.plotYmax = self.dataYmax
+        if rescale:
+            if self.dataYmin < self.plotYmin:
+                self.plotYmin = self.dataYmin
+            if self.dataYmax > self.plotYmax:
+                self.plotYmax = self.dataYmax
+        self.plotWidget.setYRange(self.plotYmin, self.plotYmax)
 
     def setTime(self, time):
         """ docstring """
         t = time.iloc[0].t
         self.selectedTimeLine.setPos(np.log10(t))
+
+    def updateOptLabel(self):
+        if self.lockYRange:
+            self.optLabel.setText("Lock Y-Range")
+        else:
+            self.optLabel.setText("")
