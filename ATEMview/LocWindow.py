@@ -175,7 +175,7 @@ class LocWidget(ATEMWidget):
             self.cbMaxLabel.setText(self.cbFormatStr.format(clMax))
             self.cbMinLabel.setText(self.cbFormatStr.format(clMin))
             bins = np.linspace(clMin, clMax, 255)
-            di = np.digitize(self.data, bins)-1
+            di = np.digitize(self.data, bins)
             self.scatter.setData(self.x, self.y, pen=None,
                                  brush=jetBrush[di], symbolSize=10.)
         else:
