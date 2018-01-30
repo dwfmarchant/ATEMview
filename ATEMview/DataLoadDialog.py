@@ -59,11 +59,29 @@ class DataLoadDialog(QtWidgets.QDialog):
                 obsFname = obsFname[8:]
             elif os.name=='posix':
                 obsFname = obsFname[7:]
+                obsFname = obsFname.strip()
+                obsFname = obsFname.replace('%20', ' ')
         if predFname.startswith('file://'):
             if os.name=='nt':
                 predFname = predFname[8:]
             elif os.name=='posix':
                 predFname = predFname[7:]
+                predFname = predFname.strip()
+                predFname = predFname.replace('%20', ' ')
+
+
+
+
+        # if obsFname.startswith('\nfile://'):
+        #     if os.name=='nt':
+        #         obsFname = obsFname[10:]
+        #     elif os.name=='posix':
+        #         obsFname = obsFname[9:]
+        # if predFname.startswith('\nfile://'):
+        #     if os.name=='nt':
+        #         predFname = predFname[10:]
+        #     elif os.name=='posix':
+        #         predFname = predFname[9:]
 
         self.data = ATEMdata(obsFname, predFname)
         self.accept()
