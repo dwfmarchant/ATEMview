@@ -26,6 +26,9 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         self.setSelectedLocInd(self.data.locs.iloc[0].name)
         self.setSelectedTimeInd(self.data.times.iloc[0].name)
 
+        # Initialize z component selection (matches default radio selection)
+        self.active_component = "Z"
+
         self.show()
 
     def initUI(self):
@@ -41,11 +44,28 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         self.btnDecay.clicked.connect(self.buttonClicked)
         self.btnGrid.clicked.connect(self.buttonClicked)
 
-        hbox = QtWidgets.QHBoxLayout()
-        hbox.addWidget(self.btnLoc)
-        hbox.addWidget(self.btnDecay)
-        hbox.addWidget(self.btnGrid)
-        self.main_widget.setLayout(hbox)
+        self.rbx = QtWidgets.QRadioButton("x")
+        self.rbx.component = "X"
+        self.rbx.toggled.connect(self.on_radio_button_toggled)
+        self.rbz = QtWidgets.QRadioButton("z")
+        self.rbz.setChecked(True)
+        self.rbz.component = "Z"
+        self.rbz.toggled.connect(self.on_radio_button_toggled)
+
+        hbox1 = QtWidgets.QHBoxLayout()
+        hbox1.addWidget(self.btnLoc)
+        hbox1.addWidget(self.btnDecay)
+        hbox1.addWidget(self.btnGrid)
+
+        hbox2 = QtWidgets.QHBoxLayout()
+        hbox2.addWidget(self.rbz)
+        hbox2.addWidget(self.rbx)
+
+        vbox = QtWidgets.QVBoxLayout()
+        vbox.addLayout(hbox1)
+        vbox.addLayout(hbox2)
+
+        self.main_widget.setLayout(vbox)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
@@ -60,6 +80,11 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
             self.openWindow('Decay')
         elif self.sender() is self.btnGrid:
             self.openWindow('Grid')
+
+    def on_radio_button_toggled(self):
+        self.active_component = self.sender().component
+
+
 
     def closeEvent(self, event):
         """

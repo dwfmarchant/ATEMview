@@ -22,6 +22,7 @@ class GridWorker(QtCore.QThread):
     def make_grid(self, tInd):
         data_time = self.data.getTime(tInd)
         x_vector, y_vector, grid = make_time_channel_grid(data_time, self.ch, **self.grdOpts)
+        # print(grid)
         grid, self.mask = mask_time_channel_grid(data_time, grid, x_vector, y_vector,
                                                  mask_radius=self.mask_radius, mask=self.mask)
         signal = {'ch':self.ch,
