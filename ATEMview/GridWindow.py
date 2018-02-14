@@ -13,7 +13,7 @@ class GridWidget(ATEMWidget):
         super(GridWidget, self).__init__(parent)
         self.parent = parent
         self.gridStore = {}
-        self.init_grids()
+        # self.init_grids()
         self.init_ui()
         if not self.parent.data.has_pred:
             self.predPlotWidget.setVisible(False)
@@ -124,26 +124,26 @@ class GridWidget(ATEMWidget):
                                                  rateLimit=30, slot=self.mouseMovedEvent)
 
     def init_grids(self):
-        ach = 'dBdt_' + self.parent.active_component
-        self.gridWorker_Obs = GridWorker(self.parent.data, ach)
+
+        self.gridWorker_Obs = GridWorker(self.parent.data, self.ach)
         self.gridWorker_Obs.grdOpts['number_cells'] = 256
         self.gridWorker_Obs.finishedGrid.connect(self.storeGrid)
         self.gridWorker_Obs.start()
 
         if self.parent.data.has_pred:
-            self.gridWorker_Pred = GridWorker(self.parent.data, ach + '_pred')
+            self.gridWorker_Pred = GridWorker(self.parent.data, self.ach + '_pred')
             self.gridWorker_Pred.grdOpts['number_cells'] = 256
             self.gridWorker_Pred.finishedGrid.connect(self.storeGrid)
             self.gridWorker_Pred.start()
 
     @QtCore.pyqtSlot(dict)
     def storeGrid(self, event):
-        ach = 'dBdt_' + self.parent.active_component
+
         if not event['ch'] in self.gridStore:
             self.gridStore[event['ch']] = {}
         self.gridStore[event['ch']][event['tInd']] = event
         if event['tInd'] == self.current_tInd:
-            if event['ch'] == ach:
+            if event['ch'] == self.ach:
                 self.absMinValue = np.nanmin(event['grid'])
                 self.absMaxValue = np.nanmax(event['grid'])
                 self.drawObs()
@@ -152,7 +152,7 @@ class GridWidget(ATEMWidget):
                 except Exception as e:
                     pass
                 self.obsPlotWidget.autoRange()
-            if event['ch'] == ach + '_pred':
+            if event['ch'] == self.ach + '_pred':
                 self.drawPred()
                 try:
                     self.drawObs()
@@ -195,14 +195,14 @@ class GridWidget(ATEMWidget):
             # self.chhLine.setPos(mousePoint.y())
 
     def setClim(self):
-        ach = 'dBdt_' + self.parent.active_component
+
         lsVal = self.lowSlider.value()
         hsVal = self.highSlider.value()
         if lsVal >= hsVal:
             self.lowSlider.setValue(hsVal-1)
             lsVal = self.lowSlider.value()
         self.drawObs()
-        if ach +'_pred' in self.gridStore:
+        if self.ach +'_pred' in self.gridStore:
             self.drawPred()
 
     def getClim(self):
@@ -224,21 +224,23 @@ class GridWidget(ATEMWidget):
 
     def setTime(self, data_times):
 
-        ach = 'dBdt_' + self.parent.active_component
         self.current_tInd = data_times.iloc[0].tInd
-        if ach in self.gridStore:
-            grid_obs = self.gridStore[ach][self.current_tInd]['grid']
+        if self.ach in self.gridStore:
+            grid_obs = self.gridStore[self.ach][self.current_tInd]['grid']
             self.absMinValue = np.nanmin(grid_obs)
             self.absMaxValue = np.nanmax(grid_obs)
             self.drawObs()
-        if ach + '_pred' in self.gridStore:
+        if self.ach + '_pred' in self.gridStore:
             self.drawPred()
 
+    def setComponent(self, component):
+        self.ach = 'dBdt_' + component
+
     def drawObs(self):
-        ach = 'dBdt_' + self.parent.active_component
-        grid_obs = self.gridStore[ach][self.current_tInd]['grid'].T
-        x_vector = self.gridStore[ach][self.current_tInd]['x_vector']
-        y_vector = self.gridStore[ach][self.current_tInd]['y_vector']
+
+        grid_obs = self.gridStore[self.ach][self.current_tInd]['grid'].T
+        x_vector = self.gridStore[self.ach][self.current_tInd]['x_vector']
+        y_vector = self.gridStore[self.ach][self.current_tInd]['y_vector']
         clMin, clMax = self.getClim()
         bins = np.linspace(clMin, clMax, 255)
         cInd_obs = np.digitize(grid_obs, bins)
@@ -251,10 +253,10 @@ class GridWidget(ATEMWidget):
         self.cbMinLabel.setText('{:.2e}'.format(clMin))
 
     def drawPred(self):
-        ach = 'dBdt_' + self.parent.active_component
-        grid_pred = self.gridStore[ach + '_pred'][self.current_tInd]['grid'].T
-        x_vector = self.gridStore[ach + '_pred'][self.current_tInd]['x_vector']
-        y_vector = self.gridStore[ach + '_pred'][self.current_tInd]['y_vector']
+
+        grid_pred = self.gridStore[self.ach + '_pred'][self.current_tInd]['grid'].T
+        x_vector = self.gridStore[self.ach + '_pred'][self.current_tInd]['x_vector']
+        y_vector = self.gridStore[self.ach + '_pred'][self.current_tInd]['y_vector']
 
         if np.any(grid_pred):
             clMin, clMax = self.getClim()

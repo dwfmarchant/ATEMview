@@ -162,18 +162,18 @@ class DecayWidget(ATEMWidget):
         """ Docstring """
 
         t = loc.t.values
-        obs = loc.dBdt_Z.values
+        obs = loc[self.ach].values
         nInd = obs < 0.
         self.obsPlot.setData(t, np.abs(obs))
         self.obsNegPlot.setData(t[nInd], np.abs(obs[nInd]))
 
-        if loc.dBdt_Z_pred.any():
-            pred = loc.dBdt_Z_pred.values
+        if loc[self.ach + '_pred'].any():
+            pred = loc[self.ach + '_pred'].values
             self.predPlot.setData(t, pred)
 
-        if loc.dBdt_Z_uncert.any():
-            lower = obs - loc.dBdt_Z_uncert.values
-            upper = obs + loc.dBdt_Z_uncert.values
+        if loc[self.ach + '_uncert'].any():
+            lower = obs - loc[self.ach + '_uncert'].values
+            upper = obs + loc[self.ach + '_uncert'].values
             lower[lower < 0.] = obs.min()/100.
             self.upperPlot.setData(t, lower)
             self.lowerPlot.setData(t, upper)
@@ -203,6 +203,9 @@ class DecayWidget(ATEMWidget):
         """ docstring """
         t = time.iloc[0].t
         self.selectedTimeLine.setPos(np.log10(t))
+
+    def setComponent(self, component):
+        self.ach = 'dBdt_' + component
 
     def updateOptLabel(self):
         if self.lockYRange:

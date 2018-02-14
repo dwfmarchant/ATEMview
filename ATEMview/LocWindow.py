@@ -11,6 +11,7 @@ class LocWidget(ATEMWidget):
     def __init__(self, parent):
         super(LocWidget, self).__init__(parent)
         self.parent = parent
+        # self.ach = 'dBdt_' + parent.active_component
         self.init_ui()
         self.showData = False
         self.data = None
@@ -201,30 +202,33 @@ class LocWidget(ATEMWidget):
             self.setData()
         self.updatePlot()
 
+    def setComponent(self, component):
+        self.ach = 'dBdt_' + component
+
     def setData(self):
         data_time = self.parent.data.getTime(self.tInd)
         self.x = data_time.x.values
         self.y = data_time.y.values
         if self.selectCombo.currentText() == "Misfit (time)":
-            if data_time.dBdt_Z_pred.any():
-                self.data = (data_time.dBdt_Z-data_time.dBdt_Z_pred).abs()/data_time.dBdt_Z_uncert
+            if data_time[self.ach + '_pred'].any():
+                self.data = (data_time[self.ach]-data_time[self.ach + '_pred']).abs()/data_time[self.ach + '_uncert']
             else:
                 self.data = None
         elif self.selectCombo.currentText() == "Misfit (total)":
-            if data_time.dBdt_Z_pred.any():
+            if data_time[self.ach + '_pred'].any():
                 grp = self.parent.data.df.groupby('locInd')
-                l22 = lambda g: np.linalg.norm((g.dBdt_Z - g.dBdt_Z_pred)/g.dBdt_Z_uncert)**2/g.shape[0]
-                grp = grp.agg(l22)[['x', 'y', 'dBdt_Z']]
-                self.data = grp.dBdt_Z.values
+                l22 = lambda g: np.linalg.norm((g[self.ach] - g[self.ach + '_pred'])/g[self.ach + '_uncert'])**2/g.shape[0]
+                grp = grp.agg(l22)[['x', 'y', self.ach]]
+                self.data = grp[self.ach].values
                 self.x = self.parent.data.locs.sort_index().x.values
                 self.y = self.parent.data.locs.sort_index().y.values
                 print(self.data)
             else:
                 self.data = None
         elif self.selectCombo.currentText() == "Observed":
-            self.data = data_time.dBdt_Z
+            self.data = data_time[self.ach]
         elif self.selectCombo.currentText() == "Predicted":
-            self.data = data_time.dBdt_Z_pred
+            self.data = data_time[self.ach + '_pred']
         else:
             self.data = None
         if self.data is not None:

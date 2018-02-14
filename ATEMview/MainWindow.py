@@ -9,6 +9,7 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
 
     selectedLocInd = 0
     selectedTimeInd = 0
+    # selectedComponent = "Z"
 
     locWindow = None
     decayWindow = None
@@ -25,9 +26,10 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         # Initialize the selection
         self.setSelectedLocInd(self.data.locs.iloc[0].name)
         self.setSelectedTimeInd(self.data.times.iloc[0].name)
+        self.setSelectedComponent("Z")
 
-        # Initialize z component selection (matches default radio selection)
-        self.active_component = "Z"
+        # # Initialize z component selection (matches default radio selection)
+        # self.active_component = "Z"
 
         self.show()
 
@@ -82,7 +84,8 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
             self.openWindow('Grid')
 
     def on_radio_button_toggled(self):
-        self.active_component = self.sender().component
+        self.setSelectedComponent(self.sender().component)
+        # self.active_component = self.sender().component
 
 
 
@@ -101,6 +104,7 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         if windowType is 'Loc':
             if self.locWindow is None:
                 self.locWindow = LocWidget(self)
+                self.setSelectedComponent(self.selectedComponent)
                 self.locWindow.setAll(self.data.locs.x.values,
                                       self.data.locs.y.values)
             else:
@@ -113,11 +117,14 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         elif windowType is 'Grid':
             if self.gridWindow is None:
                 self.gridWindow = GridWidget(self)
+                self.setSelectedComponent(self.selectedComponent)
+                self.gridWindow.init_grids()
             else:
                 self.gridWindow.toggleVisible()
         else:
             print('Unknown windowType: {}'.format(windowType))
 
+        self.setSelectedComponent(self.selectedComponent)
         self.setSelectedLocInd(self.selectedLocInd)
         self.setSelectedTimeInd(self.selectedTimeInd)
 
@@ -137,6 +144,15 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
             for window in self.windows:
                 if window is not None:
                     window.setTime(self.data.getTime(timeInd))
+
+    def setSelectedComponent(self, comp):
+        """ docstring """
+        print("ya", comp)
+        self.selectedComponent = comp
+        for window in self.windows:
+            if window is not None:
+                window.setComponent(comp)
+
 
     @property
     def windows(self):
