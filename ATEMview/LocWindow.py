@@ -222,7 +222,7 @@ class LocWidget(ATEMWidget):
                 self.data = grp[self.ach].values
                 self.x = self.parent.data.locs.sort_index().x.values
                 self.y = self.parent.data.locs.sort_index().y.values
-                print(self.data)
+                # print(self.data)
             else:
                 self.data = None
         elif self.selectCombo.currentText() == "Observed":

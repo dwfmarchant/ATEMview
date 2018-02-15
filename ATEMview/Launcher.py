@@ -18,7 +18,7 @@ def startATEMview(data=None):
     else:
         data = data
     atem = ATEMViewMainWindow(data)
-    print(atem)
+    # print(atem)
     app.exec_()
 
 if __name__ == '__main__':

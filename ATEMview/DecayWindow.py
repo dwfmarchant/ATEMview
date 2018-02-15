@@ -67,6 +67,13 @@ class DecayWidget(ATEMWidget):
                                              'width': 2},
                                         name='Pred.')
 
+        self.predNegPlot = pg.PlotDataItem(symbol='o',
+                                           symbolSize=12,
+                                           symbolBrush='m',
+                                           pen=None,
+                                           name=None)
+
+
         self.selectedTimeLine = pg.InfiniteLine(angle=90,
                                                 movable=False,
                                                 pen={'color':'k',
@@ -87,6 +94,7 @@ class DecayWidget(ATEMWidget):
         self.plotWidget.addItem(self.obsPlot)
         self.plotWidget.addItem(self.obsNegPlot)
         self.plotWidget.addItem(self.predPlot)
+        self.plotWidget.addItem(self.predNegPlot)
         self.plotWidget.addItem(self.selectedTimeLine, ignoreBounds=True)
         self.plotWidget.addItem(uncertBounds, ignoreBounds=True)
         self.plotWidget.addItem(self.lowerPlot, ignoreBounds=True)
@@ -96,10 +104,11 @@ class DecayWidget(ATEMWidget):
         self.selectedTimeLine.setZValue(1)
         self.obsNegPlot.setZValue(3)
         self.obsPlot.setZValue(2)
+        self.predNegPlot.setZValue(5)
         self.predPlot.setZValue(4)
-        self.chvLine.setZValue(5)
-        self.chhLine.setZValue(6)
-        legend.setZValue(6)
+        self.chvLine.setZValue(6)
+        self.chhLine.setZValue(7)
+        legend.setZValue(7)
 
         l = QtWidgets.QVBoxLayout(self)
         l.addWidget(self.titleLabel)
@@ -166,17 +175,20 @@ class DecayWidget(ATEMWidget):
         nInd = obs < 0.
         self.obsPlot.setData(t, np.abs(obs))
         self.obsNegPlot.setData(t[nInd], np.abs(obs[nInd]))
+        
 
         if loc[self.ach + '_pred'].any():
             pred = loc[self.ach + '_pred'].values
-            self.predPlot.setData(t, pred)
-
+            nInd = pred < 0.
+            self.predPlot.setData(t, np.abs(pred))
+            self.predNegPlot.setData(t[nInd], np.abs(pred[nInd]))
         if loc[self.ach + '_uncert'].any():
-            lower = obs - loc[self.ach + '_uncert'].values
-            upper = obs + loc[self.ach + '_uncert'].values
-            lower[lower < 0.] = obs.min()/100.
-            self.upperPlot.setData(t, lower)
-            self.lowerPlot.setData(t, upper)
+            lower = np.abs(obs) - loc[self.ach + '_uncert'].values
+            upper = np.abs(obs) + loc[self.ach + '_uncert'].values
+            ignore_ind = obs != -9999
+            lower[lower < 0.] = np.abs(obs).min()/100.
+            self.upperPlot.setData(t[ignore_ind], lower[ignore_ind])
+            self.lowerPlot.setData(t[ignore_ind], upper[ignore_ind])
 
         self.plotWidget.setXRange(np.log10(t.min()), np.log10(t.max()))
         self.updateYRange(yMin=np.log10(np.abs(obs).min()),
@@ -205,7 +217,7 @@ class DecayWidget(ATEMWidget):
         self.selectedTimeLine.setPos(np.log10(t))
 
     def setComponent(self, component):
-        self.ach = 'dBdt_' + component
+        self.ach = 'dBdt_' + component # switch active channel
 
     def updateOptLabel(self):
         if self.lockYRange:

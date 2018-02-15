@@ -35,6 +35,6 @@ class GridWorker(QtCore.QThread):
 
     def run(self):
         for ti in self.tInds:
-            print("Gridding {}, tInd = {}".format(self.ch, ti))
+            # print("Gridding {}, tInd = {}".format(self.ch, ti))
             signal = self.make_grid(ti)
             self.finishedGrid.emit(signal)

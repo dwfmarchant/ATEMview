@@ -147,7 +147,6 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
 
     def setSelectedComponent(self, comp):
         """ docstring """
-        print("ya", comp)
         self.selectedComponent = comp
         for window in self.windows:
             if window is not None:
