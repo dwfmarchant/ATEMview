@@ -6,14 +6,21 @@ ATEM data viewer
 """
 
 import sys
+from optparse import OptionParser
 from ATEMview import startATEMview
 from InvTools.ATEM import ATEMdata
 
+opt_parser = OptionParser()
+opt_parser.add_option("-m", "--moments", dest="moments", action="store_true")
+opt_parser.add_option("-o", "--obs", dest="obs", type="string", action="store")
+opt_parser.add_option("-p", "--pred", dest="pred", type="string", action="store")
+(options, args) = opt_parser.parse_args()
 
-if len(sys.argv) > 1:
+# app = QApplication(sys.argv)
+
+if not options.moments:
     print(sys.argv)
-    data = ATEMdata(*sys.argv[1:])
-else:
+    data = ATEMdata(options.obs, options.pred)
+else :
     data = None
-
-startATEMview(data)
+    startATEMview(data, moments=options.moments)

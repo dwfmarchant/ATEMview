@@ -5,50 +5,113 @@ from InvTools.ATEM import ATEMdata
 
 class DataLoadDialog(QtWidgets.QDialog):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, moments=False):
         super().__init__(parent=parent)
 
         self.data = ATEMdata()
-        self.initUI()
+        self.initUI(moments)
         self.show()
 
-    def initUI(self):
+    def initUI(self, moments):
 
-        self.obsText = QtWidgets.QLineEdit()
-        self.obsText.setDragEnabled(True)
-        self.obsText.setAcceptDrops(True)
-        self.obsText.installEventFilter(self)
+        if moments:
 
-        obsLabel = QtWidgets.QLabel('Obs File: ')
-        obsBrowsBtn = QtWidgets.QPushButton('Browse')
+            self.obsHText = QtWidgets.QLineEdit()
+            self.obsHText.setDragEnabled(True)
+            self.obsHText.setAcceptDrops(True)
+            self.obsHText.installEventFilter(self)
+            obsHLabel = QtWidgets.QLabel('High Moment Obs File: ')
+            obsHBrowsBtn = QtWidgets.QPushButton('Browse')
 
+            self.obsLText = QtWidgets.QLineEdit()
+            self.obsLText.setDragEnabled(True)
+            self.obsLText.setAcceptDrops(True)
+            self.obsLText.installEventFilter(self)
+            obsLLabel = QtWidgets.QLabel('Low Moment Obs File: ')
+            obsLBrowsBtn = QtWidgets.QPushButton('Browse')
 
-        self.predText = QtWidgets.QLineEdit()
-        self.predText.setDragEnabled(True)
-        self.predText.setAcceptDrops(True)
-        self.predText.installEventFilter(self)
-        predLabel = QtWidgets.QLabel('Pred File: ')
-        predBrowsBtn = QtWidgets.QPushButton('Browse')
+            self.predHText = QtWidgets.QLineEdit()
+            self.predHText.setDragEnabled(True)
+            self.predHText.setAcceptDrops(True)
+            self.predHText.installEventFilter(self)
+            predHLabel = QtWidgets.QLabel('High Moment Pred File: ')
+            predHBrowsBtn = QtWidgets.QPushButton('Browse')
 
-        loadBtn = QtWidgets.QPushButton('Load')
-        loadBtn.clicked.connect(self.loadFiles)
+            self.predLText = QtWidgets.QLineEdit()
+            self.predLText.setDragEnabled(True)
+            self.predLText.setAcceptDrops(True)
+            self.predLText.installEventFilter(self)
+            predLLabel = QtWidgets.QLabel('Low Moment Pred File: ')
+            predLBrowsBtn = QtWidgets.QPushButton('Browse')
 
-        ObsLayout = QtWidgets.QHBoxLayout()
-        ObsLayout.addWidget(obsLabel)
-        ObsLayout.addWidget(self.obsText)
-        ObsLayout.addWidget(obsBrowsBtn)
+            loadBtn = QtWidgets.QPushButton('Load')
+            loadBtn.clicked.connect(self.loadFiles)
 
-        PredLayout = QtWidgets.QHBoxLayout()
-        PredLayout.addWidget(predLabel)
-        PredLayout.addWidget(self.predText)
-        PredLayout.addWidget(predBrowsBtn)
+            ObsHLayout = QtWidgets.QHBoxLayout()
+            ObsHLayout.addWidget(obsHLabel)
+            ObsHLayout.addWidget(self.obsHText)
+            ObsHLayout.addWidget(obsHBrowsBtn)
 
-        vlayout = QtWidgets.QVBoxLayout()
-        vlayout.addLayout(ObsLayout)
-        vlayout.addLayout(PredLayout)
-        vlayout.addWidget(loadBtn)
+            PredHLayout = QtWidgets.QHBoxLayout()
+            PredHLayout.addWidget(predHLabel)
+            PredHLayout.addWidget(self.predHText)
+            PredHLayout.addWidget(predHBrowsBtn)
 
-        self.setLayout(vlayout)
+            ObsLLayout = QtWidgets.QHBoxLayout()
+            ObsLLayout.addWidget(obsLLabel)
+            ObsLLayout.addWidget(self.obsLText)
+            ObsLLayout.addWidget(obsLBrowsBtn)
+
+            PredLLayout = QtWidgets.QHBoxLayout()
+            PredLLayout.addWidget(predLLabel)
+            PredLLayout.addWidget(self.predLText)
+            PredLLayout.addWidget(predLBrowsBtn)
+
+            vlayout = QtWidgets.QVBoxLayout()
+            vlayout.addLayout(ObsLLayout)
+            vlayout.addLayout(PredLLayout)
+            vlayout.addLayout(ObsHLayout)
+            vlayout.addLayout(PredHLayout)
+            vlayout.addWidget(loadBtn)
+
+            self.setLayout(vlayout)
+
+        else:
+
+            self.obsText = QtWidgets.QLineEdit()
+            self.obsText.setDragEnabled(True)
+            self.obsText.setAcceptDrops(True)
+            self.obsText.installEventFilter(self)
+
+            obsLabel = QtWidgets.QLabel('Obs File: ')
+            obsBrowsBtn = QtWidgets.QPushButton('Browse')
+
+            self.predText = QtWidgets.QLineEdit()
+            self.predText.setDragEnabled(True)
+            self.predText.setAcceptDrops(True)
+            self.predText.installEventFilter(self)
+            predLabel = QtWidgets.QLabel('Pred File: ')
+            predBrowsBtn = QtWidgets.QPushButton('Browse')
+
+            loadBtn = QtWidgets.QPushButton('Load')
+            loadBtn.clicked.connect(self.loadFiles)
+
+            ObsLayout = QtWidgets.QHBoxLayout()
+            ObsLayout.addWidget(obsLabel)
+            ObsLayout.addWidget(self.obsText)
+            ObsLayout.addWidget(obsBrowsBtn)
+
+            PredLayout = QtWidgets.QHBoxLayout()
+            PredLayout.addWidget(predLabel)
+            PredLayout.addWidget(self.predText)
+            PredLayout.addWidget(predBrowsBtn)
+
+            vlayout = QtWidgets.QVBoxLayout()
+            vlayout.addLayout(ObsLayout)
+            vlayout.addLayout(PredLayout)
+            vlayout.addWidget(loadBtn)
+
+            self.setLayout(vlayout)
 
     def loadFiles(self):
         obsFname = self.obsText.text()
