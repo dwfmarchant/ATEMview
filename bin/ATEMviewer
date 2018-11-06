@@ -17,10 +17,10 @@ opt_parser.add_option("-p", "--pred", dest="pred", type="string", action="store"
 (options, args) = opt_parser.parse_args()
 
 # app = QApplication(sys.argv)
-
-if not options.moments:
-    print(sys.argv)
+print(options.moments)
+if options.moments is None:
     data = ATEMdata(options.obs, options.pred)
+    startATEMview(data, moments=False)
 else :
     data = None
     startATEMview(data, moments=options.moments)

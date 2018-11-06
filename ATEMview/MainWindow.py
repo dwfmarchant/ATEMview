@@ -19,7 +19,7 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self)
 
         self.data = data
-        self.data = {'high': highdata, 'low': lowdata}
+        # self.data = {'high': highdata, 'low': lowdata}
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.initUI()

@@ -136,7 +136,12 @@ class DataLoadDialog(QtWidgets.QDialog):
         self.accept()
 
     def eventFilter(self, obj, event):
-        if (obj is self.obsText) | (obj is self.predText):
+        checkobj = (obj is self.obsHText)  | \
+                   (obj is self.predHText) | \
+                   (obj is self.obsLText)  | \
+                   (obj is self.predLText)
+
+        if checkobj:
             if (event.type() == QtCore.QEvent.DragEnter):
                 if event.mimeData().hasUrls():
                     event.accept()

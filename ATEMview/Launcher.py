@@ -11,6 +11,8 @@ def startATEMview(data=None, moments=False):
     """
     ATEMview launcher
     """
+    
+    app = QtWidgets.QApplication(sys.argv)
 
     if data is None:
         if moments:
