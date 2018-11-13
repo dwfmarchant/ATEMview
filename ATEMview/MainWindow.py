@@ -19,7 +19,11 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self)
 
         self.data = data
-        # self.data = {'high': highdata, 'low': lowdata}
+        if "moment" in self.data.df.keys():
+            self.isMoment = True
+            self.setSelectedMoment("H")
+            self.mInd = self.data.df.moment == "H"
+            self.tMaxInd = self.data.df[self.mInd].tInd.max()
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.initUI()
@@ -28,6 +32,8 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         self.setSelectedLocInd(self.data.locs.iloc[0].name)
         self.setSelectedTimeInd(self.data.times.iloc[0].name)
         self.setSelectedComponent("Z")
+        
+        
 
         # # Initialize z component selection (matches default radio selection)
         # self.active_component = "Z"
@@ -47,13 +53,13 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         self.btnDecay.clicked.connect(self.buttonClicked)
         self.btnGrid.clicked.connect(self.buttonClicked)
 
-        self.rbx = QtWidgets.QRadioButton("x")
+        self.rbx = QtWidgets.QRadioButton("X component")
         self.rbx.component = "X"
-        self.rbx.toggled.connect(self.on_radio_button_toggled)
-        self.rbz = QtWidgets.QRadioButton("z")
+        self.rbx.toggled.connect(self.on_component_toggled)
+        self.rbz = QtWidgets.QRadioButton("Z Component")
         self.rbz.setChecked(True)
         self.rbz.component = "Z"
-        self.rbz.toggled.connect(self.on_radio_button_toggled)
+        self.rbz.toggled.connect(self.on_component_toggled)
 
         hbox1 = QtWidgets.QHBoxLayout()
         hbox1.addWidget(self.btnLoc)
@@ -64,9 +70,26 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         hbox2.addWidget(self.rbz)
         hbox2.addWidget(self.rbx)
 
+        hboxes = [hbox1, hbox2]
+
+        if self.isMoment:
+
+            self.rblow = QtWidgets.QRadioButton("Low Moment")
+            self.rblow.moment = "L"
+            self.rblow.toggled.connect(self.on_moment_toggled)
+            self.rbhigh = QtWidgets.QRadioButton("High Moment")
+            self.rbhigh.setChecked(True)
+            self.rbhigh.moment = "H"
+            self.rbhigh.toggled.connect(self.on_moment_toggled)
+
+            hbox3 = QtWidgets.QHBoxLayout()
+            hbox3.addWidget(self.rblow)
+            hbox3.addWidget(self.rbhigh)
+            hboxes.append(hbox3)
+
         vbox = QtWidgets.QVBoxLayout()
-        vbox.addLayout(hbox1)
-        vbox.addLayout(hbox2)
+        for hb in hboxes:
+            vbox.addLayout(hb)
 
         self.main_widget.setLayout(vbox)
 
@@ -84,11 +107,14 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         elif self.sender() is self.btnGrid:
             self.openWindow('Grid')
 
-    def on_radio_button_toggled(self):
+    def on_component_toggled(self):
         self.setSelectedComponent(self.sender().component)
-        # self.active_component = self.sender().component
 
-
+    def on_moment_toggled(self):
+        self.setSelectedMoment(self.sender().moment)
+        self.mInd = self.data.df.moment == self.sender().moment
+        self.tMaxInd = self.data.df[self.mInd].tInd.max()
+        self.setSelectedTimeInd(0)
 
     def closeEvent(self, event):
         """
@@ -105,7 +131,6 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         if windowType is 'Loc':
             if self.locWindow is None:
                 self.locWindow = LocWidget(self)
-                self.setSelectedComponent(self.selectedComponent)
                 self.locWindow.setAll(self.data.locs.x.values,
                                       self.data.locs.y.values)
             else:
@@ -117,14 +142,15 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
                 self.decayWindow.toggleVisible()
         elif windowType is 'Grid':
             if self.gridWindow is None:
-                self.gridWindow = GridWidget(self)
-                self.setSelectedComponent(self.selectedComponent)
+                self.gridWindow = GridWidget(self, self.selectedComponent)
                 self.gridWindow.init_grids()
             else:
                 self.gridWindow.toggleVisible()
         else:
             print('Unknown windowType: {}'.format(windowType))
 
+        if self.isMoment:
+            self.setSelectedMoment(self.selectedMoment)
         self.setSelectedComponent(self.selectedComponent)
         self.setSelectedLocInd(self.selectedLocInd)
         self.setSelectedTimeInd(self.selectedTimeInd)
@@ -140,11 +166,14 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
 
     def setSelectedTimeInd(self, timeInd):
         """ docstring """
-        if timeInd in self.data.times.index:
+        tInds = self.data.df[self.mInd].tInd.unique() if self.isMoment else self.data.df.tInd.unique()
+        if timeInd in tInds:
             self.selectedTimeInd = timeInd
             for window in self.windows:
                 if window is not None:
-                    window.setTime(self.data.getTime(timeInd))
+                    tdat = self.data.getTime(timeInd)
+                    tdat = tdat[tdat.moment == self.selectedMoment] if self.isMoment else tdat
+                    window.setTime(tdat)
 
     def setSelectedComponent(self, comp):
         """ docstring """
@@ -152,7 +181,13 @@ class ATEMViewMainWindow(QtWidgets.QMainWindow):
         for window in self.windows:
             if window is not None:
                 window.setComponent(comp)
-
+            
+    def setSelectedMoment(self, moment):
+        """ docstring """
+        self.selectedMoment = moment
+        for window in self.windows:
+            if window is not None:
+                window.setMoment(moment)
 
     @property
     def windows(self):

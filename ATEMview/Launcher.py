@@ -19,13 +19,18 @@ def startATEMview(data=None, moments=False):
             dataLoader = DataLoadDialog(moments=True)
             dataLoader.exec_()
             data = dataLoader.data
+            atem = ATEMViewMainWindow(data)
         else:
             dataLoader = DataLoadDialog()
             dataLoader.exec_()
             data = dataLoader.data
+            atem = ATEMViewMainWindow(data)
+
     else:
         data = data
-    atem = ATEMViewMainWindow(data)
+        atem = ATEMViewMainWindow(data)
+
+    
     # print(atem)
     app.exec_()
 

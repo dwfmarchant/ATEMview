@@ -23,6 +23,41 @@ class DecayWidget(ATEMWidget):
         self.init_ui()
         self.show()
 
+    def initGraph(self, name=False):
+            graphItems = {}
+            graphItems['obsPlot'] = pg.PlotDataItem(symbol='o',
+                                                    symbolSize=5,
+                                                    symbolBrush='k',
+                                                    pen={'color': 'k',
+                                                        'width': 2},
+                                                    name = 'Obs.' if name else None)
+
+            graphItems['obsNegPlot'] = pg.PlotDataItem(symbol='o',
+                                                        symbolSize=5,
+                                                        symbolBrush='r',
+                                                        pen=None,
+                                                        name=None)
+
+            graphItems['predPlot'] = pg.PlotDataItem(symbol='o',
+                                                    symbolSize=5,
+                                                    symbolBrush='b',
+                                                    pen={'color': 'b',
+                                                        'width': 2},
+                                                    name='Pred.' if name else None)
+
+            graphItems['predNegPlot'] = pg.PlotDataItem(symbol='o',
+                                                        symbolSize=12,
+                                                        symbolBrush='m',
+                                                        pen=None,
+                                                        name=None)
+
+            graphItems['lowerPlot'] = pg.PlotDataItem()
+            graphItems['upperPlot'] = pg.PlotDataItem()
+            graphItems['uncertBounds'] = pg.FillBetweenItem(graphItems['lowerPlot'], graphItems['upperPlot'], 0.8)
+
+
+            return graphItems
+    
     def init_ui(self):
         """ Docstring """
 
@@ -47,43 +82,19 @@ class DecayWidget(ATEMWidget):
         legend = self.plotWidget.addLegend(offset=(450, 30))
         self.plotWidget.showGrid(x=True, y=True)
 
-        self.obsPlot = pg.PlotDataItem(symbol='o',
-                                       symbolSize=5,
-                                       symbolBrush='k',
-                                       pen={'color': 'k',
-                                            'width': 2},
-                                       name='Obs.')
+        if self.parent.isMoment:
+            self.graphItems = {'L':self.initGraph(name=True), 'H':self.initGraph()} # [low moment, high moment]
+        else:
+            self.graphItems = {'N':self.initGraph()}
 
-        self.obsNegPlot = pg.PlotDataItem(symbol='o',
-                                          symbolSize=5,
-                                          symbolBrush='r',
-                                          pen=None,
-                                          name=None)
-
-        self.predPlot = pg.PlotDataItem(symbol='o',
-                                        symbolSize=5,
-                                        symbolBrush='b',
-                                        pen={'color': 'b',
-                                             'width': 2},
-                                        name='Pred.')
-
-        self.predNegPlot = pg.PlotDataItem(symbol='o',
-                                           symbolSize=12,
-                                           symbolBrush='m',
-                                           pen=None,
-                                           name=None)
+     
 
 
         self.selectedTimeLine = pg.InfiniteLine(angle=90,
                                                 movable=False,
-                                                pen={'color':'k',
-                                                     'width':2,
-                                                     'style':QtCore.Qt.DotLine})
-
-
-        self.lowerPlot = pg.PlotDataItem()
-        self.upperPlot = pg.PlotDataItem()
-        uncertBounds = pg.FillBetweenItem(self.lowerPlot, self.upperPlot, 0.8)
+                                                pen={'color': 'k',
+                                                     'width': 2,
+                                                     'style': QtCore.Qt.DotLine})
 
         # Crosshair
         self.chvLine = pg.InfiniteLine(angle=90, movable=False, pen={'color':'k', 'width':0.25})
@@ -91,24 +102,21 @@ class DecayWidget(ATEMWidget):
 
         self.plotWidget.addItem(self.chvLine, ignoreBounds=True)
         self.plotWidget.addItem(self.chhLine, ignoreBounds=True)
-        self.plotWidget.addItem(self.obsPlot)
-        self.plotWidget.addItem(self.obsNegPlot)
-        self.plotWidget.addItem(self.predPlot)
-        self.plotWidget.addItem(self.predNegPlot)
         self.plotWidget.addItem(self.selectedTimeLine, ignoreBounds=True)
-        self.plotWidget.addItem(uncertBounds, ignoreBounds=True)
-        self.plotWidget.addItem(self.lowerPlot, ignoreBounds=True)
-        self.plotWidget.addItem(self.upperPlot, ignoreBounds=True)
 
-        uncertBounds.setZValue(0)
-        self.selectedTimeLine.setZValue(1)
-        self.obsNegPlot.setZValue(3)
-        self.obsPlot.setZValue(2)
-        self.predNegPlot.setZValue(5)
-        self.predPlot.setZValue(4)
-        self.chvLine.setZValue(6)
-        self.chhLine.setZValue(7)
-        legend.setZValue(7)
+        for gi in self.graphItems.values():
+            for v in gi.values():
+                self.plotWidget.addItem(v)
+
+        # uncertBounds.setZValue(0)
+        # self.selectedTimeLine.setZValue(1)
+        # self.obsNegPlot.setZValue(3)
+        # self.obsPlot.setZValue(2)
+        # self.predNegPlot.setZValue(5)
+        # self.predPlot.setZValue(4)
+        # self.chvLine.setZValue(6)
+        # self.chhLine.setZValue(7)
+        # legend.setZValue(7)np.abs(obs)
 
         l = QtWidgets.QVBoxLayout(self)
         l.addWidget(self.titleLabel)
@@ -169,30 +177,52 @@ class DecayWidget(ATEMWidget):
 
     def setLocation(self, loc):
         """ Docstring """
-
-        t = loc.t.values
-        obs = loc[self.ach].values
-        nInd = obs < 0.
-        self.obsPlot.setData(t, np.abs(obs))
-        self.obsNegPlot.setData(t[nInd], np.abs(obs[nInd]))
         
+        for gi, gv in self.graphItems.items():
+            
+            for k, g in gv.items():
 
-        if loc[self.ach + '_pred'].any():
-            pred = loc[self.ach + '_pred'].values
-            nInd = pred < 0.
-            self.predPlot.setData(t, np.abs(pred))
-            self.predNegPlot.setData(t[nInd], np.abs(pred[nInd]))
-        if loc[self.ach + '_uncert'].any():
-            lower = np.abs(obs) - loc[self.ach + '_uncert'].values
-            upper = np.abs(obs) + loc[self.ach + '_uncert'].values
-            ignore_ind = obs != -9999
-            lower[lower < 0.] = np.abs(obs).min()/100.
-            self.upperPlot.setData(t[ignore_ind], lower[ignore_ind])
-            self.lowerPlot.setData(t[ignore_ind], upper[ignore_ind])
+                if gi == 'N':
+                    t = loc.t.values
+                    obs = loc[self.ach]
+                    pred = loc[self.ach + '_pred']
+                    uncert = loc[self.ach + '_uncert']
+                    lower = obs.abs().values - uncert.values
+                    upper = obs.abs().values + uncert.values
+                else:
+                    Mloc = loc[loc["moment"] == gi]
+                    t = Mloc.t.values
+                    obs = Mloc[self.ach]
+                    pred = Mloc[self.ach + '_pred']
+                    uncert = Mloc[self.ach + '_uncert']
+                    lower = obs.abs().values - uncert.values
+                    upper = obs.abs().values + uncert.values
 
-        self.plotWidget.setXRange(np.log10(t.min()), np.log10(t.max()))
-        self.updateYRange(yMin=np.log10(np.abs(obs).min()),
-                          yMax=np.log10(np.abs(obs).max()))
+                if k == 'obsPlot':
+                    g.setData(t, obs.abs().values)
+                elif k == 'obsNegPlot':
+                    nInd = obs.values < 0.
+                    g.setData(t[nInd], obs.abs().values[nInd])
+                elif k == 'predPlot':
+                    if pred.any():
+                        g.setData(t, pred.abs().values)
+                elif k == 'predNegPlot':
+                    if pred.any():
+                        nInd = pred.values < 0.
+                        g.setData(t[nInd], pred.abs().values[nInd])
+                elif k == 'upperPlot':
+                    if loc[self.ach + '_uncert'].any():
+                        ignore_ind = obs != -9999
+                        g.setData(t[ignore_ind], upper[ignore_ind])
+                elif k == 'lowerPlot':
+                    if loc[self.ach + '_uncert'].any():
+                        ignore_ind = obs != -9999
+                        lower[lower < 0.] = obs.abs().min()/100.
+                        g.setData(t[ignore_ind], lower[ignore_ind])
+
+        self.plotWidget.setXRange(np.log10(loc.t.min()), np.log10(loc.t.max()))
+        self.updateYRange(yMin=np.log10(loc[self.ach].abs().min()),
+                          yMax=np.log10(loc[self.ach].abs().max()))
 
         self.titleLabel.setText('{}'.format(loc.locInd.iloc[0]))
 
@@ -213,11 +243,19 @@ class DecayWidget(ATEMWidget):
 
     def setTime(self, time):
         """ docstring """
-        t = time.iloc[0].t
+        if self.isMoment:
+            Mtime = time[time.moment == self.selectedMoment]
+            t = Mtime.iloc[0].t
+        else:
+            t = time.iloc[0].t
         self.selectedTimeLine.setPos(np.log10(t))
 
     def setComponent(self, component):
         self.ach = 'dBdt_' + component # switch active channel
+
+    def setMoment(self, moment):
+        self.isMoment = True
+        self.selectedMoment = moment
 
     def updateOptLabel(self):
         if self.lockYRange:

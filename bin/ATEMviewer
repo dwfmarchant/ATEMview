@@ -14,13 +14,21 @@ opt_parser = OptionParser()
 opt_parser.add_option("-m", "--moments", dest="moments", action="store_true")
 opt_parser.add_option("-o", "--obs", dest="obs", type="string", action="store")
 opt_parser.add_option("-p", "--pred", dest="pred", type="string", action="store")
+# opt_parser.add_option("-ho", "--hobs", dest="hobs", type="string", action="store")
+# opt_parser.add_option("-hp", "--hpred", dest="hpred", type="string", action="store")
+# opt_parser.add_option("-lo", "--lobs", dest="lobs", type="string", action="store")
+# opt_parser.add_option("-lp", "--lpred", dest="lpred", type="string", action="store")
+
 (options, args) = opt_parser.parse_args()
 
-# app = QApplication(sys.argv)
-print(options.moments)
-if options.moments is None:
-    data = ATEMdata(options.obs, options.pred)
-    startATEMview(data, moments=False)
-else :
+
+if options.moments is not None:
     data = None
     startATEMview(data, moments=options.moments)
+elif options.obs is None and options.pred is None:
+    data = None
+    startATEMview(data, moments=False)
+else:
+    data = ATEMdata(options.obs, options.pred)
+    startATEMview(data, moments=False)
+    

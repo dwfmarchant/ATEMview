@@ -9,12 +9,13 @@ class DataLoadDialog(QtWidgets.QDialog):
         super().__init__(parent=parent)
 
         self.data = ATEMdata()
-        self.initUI(moments)
+        self.moments = moments
+        self.initUI()
         self.show()
 
-    def initUI(self, moments):
+    def initUI(self):
 
-        if moments:
+        if self.moments:
 
             self.obsHText = QtWidgets.QLineEdit()
             self.obsHText.setDragEnabled(True)
@@ -114,32 +115,87 @@ class DataLoadDialog(QtWidgets.QDialog):
             self.setLayout(vlayout)
 
     def loadFiles(self):
-        obsFname = self.obsText.text()
-        predFname = self.predText.text()
 
-        if obsFname.startswith('file://'):
-            if os.name=='nt':
-                obsFname = obsFname[8:]
-            elif os.name=='posix':
-                obsFname = obsFname[7:]
-                obsFname = obsFname.strip()
-                obsFname = obsFname.replace('%20', ' ')
-        if predFname.startswith('file://'):
-            if os.name=='nt':
-                predFname = predFname[8:]
-            elif os.name=='posix':
-                predFname = predFname[7:]
-                predFname = predFname.strip()
-                predFname = predFname.replace('%20', ' ')
+        if self.moments:
 
-        self.data = ATEMdata(obsFname, predFname)
-        self.accept()
+            obsHFname = self.obsHText.text()
+            predHFname = self.predHText.text()
+
+            obsLFname = self.obsLText.text()
+            predLFname = self.predLText.text()
+
+            if obsHFname.startswith('file://'):
+                if os.name == 'nt':
+                    obsHFname = obsHFname[8:]
+                elif os.name == 'posix':
+                    obsHFname = obsHFname[7:]
+                    obsHFname = obsHFname.strip()
+                    obsHFname = obsHFname.replace('%20', ' ')
+            if predHFname.startswith('file://'):
+                if os.name == 'nt':
+                    predHFname = predHFname[8:]
+                elif os.name == 'posix':
+                    predHFname = predHFname[7:]
+                    predHFname = predHFname.strip()
+                    predHFname = predHFname.replace('%20', ' ')
+
+            if obsLFname.startswith('file://'):
+                if os.name == 'nt':
+                    obsLFname = obsLFname[8:]
+                elif os.name == 'posix':
+                    obsLFname = obsLFname[7:]
+                    obsLFname = obsLFname.strip()
+                    obsLFname = obsLFname.replace('%20', ' ')
+            if predLFname.startswith('file://'):
+                if os.name == 'nt':
+                    predLFname = predLFname[8:]
+                elif os.name == 'posix':
+                    predLFname = predLFname[7:]
+                    predLFname = predLFname.strip()
+                    predLFname = predLFname.replace('%20', ' ')
+
+            # self.LMdata = ATEMdata(obsLFname, predLFname)
+            # self.HMdata = ATEMdata(obsHFname, predHFname)
+            self.LMdata = ATEMdata('obs_rotate_lm.txt', 'dpred_006_lm.txt')
+            self.HMdata = ATEMdata('obs_rotate_hm.txt', 'dpred_009_hm.txt')
+            self.LMdata.df['moment'] = 'L'
+            self.HMdata.df['moment'] = 'H'
+            self.data = ATEMdata()
+            self.data.df = self.LMdata.df.append(self.HMdata.df).reset_index(drop=True)
+            self.accept()
+
+        else:
+
+            obsFname = self.obsText.text()
+            predFname = self.predText.text()
+
+            if obsFname.startswith('file://'):
+                if os.name=='nt':
+                    obsFname = obsFname[8:]
+                elif os.name=='posix':
+                    obsFname = obsFname[7:]
+                    obsFname = obsFname.strip()
+                    obsFname = obsFname.replace('%20', ' ')
+            if predFname.startswith('file://'):
+                if os.name=='nt':
+                    predFname = predFname[8:]
+                elif os.name=='posix':
+                    predFname = predFname[7:]
+                    predFname = predFname.strip()
+                    predFname = predFname.replace('%20', ' ')
+
+            self.data = ATEMdata(obsFname, predFname)
+            self.accept()
 
     def eventFilter(self, obj, event):
-        checkobj = (obj is self.obsHText)  | \
-                   (obj is self.predHText) | \
-                   (obj is self.obsLText)  | \
-                   (obj is self.predLText)
+        if self.moments:
+            checkobj = (obj is self.obsHText)  | \
+                       (obj is self.predHText) | \
+                       (obj is self.obsLText)  | \
+                       (obj is self.predLText)
+        else:
+            checkobj = (obj is self.obsText) | \
+                       (obj is self.predText)
 
         if checkobj:
             if (event.type() == QtCore.QEvent.DragEnter):

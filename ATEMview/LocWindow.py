@@ -205,6 +205,10 @@ class LocWidget(ATEMWidget):
     def setComponent(self, component):
         self.ach = 'dBdt_' + component
 
+    def setMoment(self, moment):
+        self.isMoment = True
+        self.selectedMoment = moment
+
     def setData(self):
         data_time = self.parent.data.getTime(self.tInd)
         self.x = data_time.x.values

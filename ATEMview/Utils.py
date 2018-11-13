@@ -24,7 +24,7 @@ def mask_time_channel_grid(data_time, grid, x_vector, y_vector, mask_radius=100.
         mask = ~maskGrid(data_time.x.values, data_time.y.values,
                          x_vector, y_vector, mask_radius)
     elif mask.shape != grid.shape:
-        print("Warning: Mask and grid differnt shapes")
+        print("Warning: Mask and grid different shapes")
         mask = ~maskGrid(data_time.x.values, data_time.y.values,
                          x_vector, y_vector, mask_radius)
 

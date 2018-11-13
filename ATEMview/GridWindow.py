@@ -9,16 +9,18 @@ from .colormaps import jetCM
 class GridWidget(ATEMWidget):
     """docstring for GridWidget"""
 
-    def __init__(self, parent):
+    def __init__(self, parent, component):
         super(GridWidget, self).__init__(parent)
         self.parent = parent
-        self.gridStore = {}
+        self.ach = 'dBdt_' + self.parent.selectedComponent
+        self.isMoment = self.parent.isMoment
+        self.selectedMoment = self.parent.selectedMoment if self.isMoment else 'N'
+        self.gridStore = {'N': {}, 'L': {}, 'H': {}}
         # self.init_grids()
         self.init_ui()
         if not self.parent.data.has_pred:
             self.predPlotWidget.setVisible(False)
 
-        self.current_tInd = self.parent.selectedTimeInd
         self.absMinValue = 1e-20
         self.absMaxValue = 1e20
 
@@ -125,40 +127,58 @@ class GridWidget(ATEMWidget):
 
     def init_grids(self):
 
-        self.gridWorker_Obs = GridWorker(self.parent.data, self.ach)
-        self.gridWorker_Obs.grdOpts['number_cells'] = 256
-        self.gridWorker_Obs.finishedGrid.connect(self.storeGrid)
-        self.gridWorker_Obs.start()
+        if self.isMoment:
+            self.gridWorker_LObs = GridWorker(self.parent.data, self.ach, 'L')
+            self.gridWorker_HObs = GridWorker(self.parent.data, self.ach, 'H')
+        else:
+            self.gridWorker_Obs = GridWorker(self.parent.data, self.ach)
+
+        gws = [self.gridWorker_LObs, self.gridWorker_HObs] if self.isMoment else [self.gridWorker_Obs]
+
+        for gw in gws:
+            gw.finishedGrid.connect(self.storeGrid)
+            gw.grdOpts['number_cells'] = 256
+            gw.start()
 
         if self.parent.data.has_pred:
-            self.gridWorker_Pred = GridWorker(self.parent.data, self.ach + '_pred')
-            self.gridWorker_Pred.grdOpts['number_cells'] = 256
-            self.gridWorker_Pred.finishedGrid.connect(self.storeGrid)
-            self.gridWorker_Pred.start()
+            if self.isMoment:
+                self.gridWorker_LPred = GridWorker(self.parent.data, self.ach + '_pred', 'L')
+                self.gridWorker_HPred = GridWorker(self.parent.data, self.ach + '_pred', 'H')
+            else:
+                self.gridWorker_Pred = GridWorker(self.parent.data, self.ach + '_pred')
+
+            gws = [self.gridWorker_LPred, self.gridWorker_HPred] if self.isMoment else [self.gridWorker_Pred]
+
+            for gw in gws:
+                gw.finishedGrid.connect(self.storeGrid)
+                gw.grdOpts['number_cells'] = 256
+                gw.start()
 
     @QtCore.pyqtSlot(dict)
     def storeGrid(self, event):
+        if event['ch'] not in self.gridStore[event['moment']]:
+            self.gridStore[event['moment']][event['ch']] = {}
+        self.gridStore[event['moment']][event['ch']][event['tInd']] = event
 
-        if not event['ch'] in self.gridStore:
-            self.gridStore[event['ch']] = {}
-        self.gridStore[event['ch']][event['tInd']] = event
-        if event['tInd'] == self.current_tInd:
+        if event['tInd'] == self.selectedTimeInd:
             if event['ch'] == self.ach:
-                self.absMinValue = np.nanmin(event['grid'])
-                self.absMaxValue = np.nanmax(event['grid'])
-                self.drawObs()
-                try:
-                    self.drawPred()
-                except Exception as e:
-                    pass
-                self.obsPlotWidget.autoRange()
-            if event['ch'] == self.ach + '_pred':
-                self.drawPred()
-                try:
+                if event['moment'] == self.selectedMoment:
+                    self.absMinValue = np.nanmin(event['grid'])
+                    self.absMaxValue = np.nanmax(event['grid'])
                     self.drawObs()
-                except Exception as e:
-                    pass
-                self.predPlotWidget.autoRange()
+                    try:
+                        self.drawPred()
+                    except Exception as e:
+                        pass
+                    self.obsPlotWidget.autoRange()
+            if event['ch'] == self.ach + '_pred':
+                if event['moment'] == self.selectedMoment:
+                    self.drawPred()
+                    try:
+                        self.drawObs()
+                    except Exception as e:
+                        pass
+                    self.predPlotWidget.autoRange()
 
     def clickObsEvent(self, event):
         if self.obsPlotWidget.sceneBoundingRect().contains(event.scenePos()):
@@ -189,7 +209,8 @@ class GridWidget(ATEMWidget):
         elif self.predPlotWidget.sceneBoundingRect().contains(pos):
             mousePoint = self.predPlotWidget.getViewBox().mapSceneToView(pos)
             string = "<span style='font-size: 12pt'>x={:.0f}, y={:.0f}</span>"
-            self.locLabel.setText(string.format(mousePoint.x(), mousePoint.y()))
+            self.locLabel.setText(string.format(
+                mousePoint.x(), mousePoint.y()))["moment"]
 
             # self.chvLine.setPos(mousePoint.x())
             # self.chhLine.setPos(mousePoint.y())
@@ -202,7 +223,7 @@ class GridWidget(ATEMWidget):
             self.lowSlider.setValue(hsVal-1)
             lsVal = self.lowSlider.value()
         self.drawObs()
-        if self.ach +'_pred' in self.gridStore:
+        if self.ach +'_pred' in self.gridStore[self.selectedMoment]:
             self.drawPred()
 
     def getClim(self):
@@ -223,24 +244,35 @@ class GridWidget(ATEMWidget):
         self.selectedLocHlinePred.setPos(yl)
 
     def setTime(self, data_times):
-
-        self.current_tInd = data_times.iloc[0].tInd
-        if self.ach in self.gridStore:
-            grid_obs = self.gridStore[self.ach][self.current_tInd]['grid']
+        self.selectedTimeInd = data_times.iloc[0].tInd
+        if self.ach in self.gridStore[self.selectedMoment]:
+            grid_obs = self.gridStore[self.selectedMoment][self.ach][self.selectedTimeInd]['grid']
             self.absMinValue = np.nanmin(grid_obs)
             self.absMaxValue = np.nanmax(grid_obs)
             self.drawObs()
-        if self.ach + '_pred' in self.gridStore:
+        if self.ach + '_pred' in self.gridStore[self.selectedMoment]:
             self.drawPred()
 
     def setComponent(self, component):
         self.ach = 'dBdt_' + component
 
+    def setMoment(self, moment):
+        self.isMoment = True
+        self.selectedMoment = moment
+        # self.selectedTimeInd = 0
+        # if self.ach in self.gridStore[self.selectedMoment]:
+        #     grid_obs = self.gridStore[self.selectedMoment][self.ach][self.selectedTimeInd]['grid']
+        #     self.absMinValue = np.nanmin(grid_obs)
+        #     self.absMaxValue = np.nanmax(grid_obs)
+        #     self.drawObs()
+        # if self.ach + '_pred' in self.gridStore[self.selectedMoment]:
+        #     self.drawPred()
+
     def drawObs(self):
 
-        grid_obs = self.gridStore[self.ach][self.current_tInd]['grid'].T
-        x_vector = self.gridStore[self.ach][self.current_tInd]['x_vector']
-        y_vector = self.gridStore[self.ach][self.current_tInd]['y_vector']
+        grid_obs = self.gridStore[self.selectedMoment][self.ach][self.selectedTimeInd]['grid'].T
+        x_vector = self.gridStore[self.selectedMoment][self.ach][self.selectedTimeInd]['x_vector']
+        y_vector = self.gridStore[self.selectedMoment][self.ach][self.selectedTimeInd]['y_vector']
         clMin, clMax = self.getClim()
         bins = np.linspace(clMin, clMax, 255)
         cInd_obs = np.digitize(grid_obs, bins)
@@ -254,9 +286,9 @@ class GridWidget(ATEMWidget):
 
     def drawPred(self):
 
-        grid_pred = self.gridStore[self.ach + '_pred'][self.current_tInd]['grid'].T
-        x_vector = self.gridStore[self.ach + '_pred'][self.current_tInd]['x_vector']
-        y_vector = self.gridStore[self.ach + '_pred'][self.current_tInd]['y_vector']
+        grid_pred = self.gridStore[self.selectedMoment][self.ach + '_pred'][self.selectedTimeInd]['grid'].T
+        x_vector = self.gridStore[self.selectedMoment][self.ach + '_pred'][self.selectedTimeInd]['x_vector']
+        y_vector = self.gridStore[self.selectedMoment][self.ach + '_pred'][self.selectedTimeInd]['y_vector']
 
         if np.any(grid_pred):
             clMin, clMax = self.getClim()
