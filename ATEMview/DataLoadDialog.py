@@ -154,10 +154,10 @@ class DataLoadDialog(QtWidgets.QDialog):
                     predLFname = predLFname.strip()
                     predLFname = predLFname.replace('%20', ' ')
 
-            # self.LMdata = ATEMdata(obsLFname, predLFname)
-            # self.HMdata = ATEMdata(obsHFname, predHFname)
-            self.LMdata = ATEMdata('obs_rotate_lm.txt', 'dpred_006_lm.txt')
-            self.HMdata = ATEMdata('obs_rotate_hm.txt', 'dpred_009_hm.txt')
+            self.LMdata = ATEMdata(obsLFname, predLFname)
+            self.HMdata = ATEMdata(obsHFname, predHFname)
+            # self.LMdata = ATEMdata('obs_rotate_lm.txt', 'dpred_006_lm.txt')
+            # self.HMdata = ATEMdata('obs_rotate_hm.txt', 'dpred_009_hm.txt')
             self.LMdata.df['moment'] = 'L'
             self.HMdata.df['moment'] = 'H'
             self.data = ATEMdata()
